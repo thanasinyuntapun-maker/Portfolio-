@@ -1,0 +1,456 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Studio overlay — adds personal identity on top of the Apple-style base.
+   – Editorial serif for emphasis (Instrument Serif italic)
+   – Mono details everywhere (JetBrains Mono)
+   – Corner crosshair / registration marks on key tiles
+   – Manifesto strip, build-log ticker
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --f-serif: "Instrument Serif", "Noto Serif Thai", Georgia, serif;
+  --f-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+  --signal: #ff5d2b;     /* warm orange-red — personal accent */
+  --signal-2: #00d27a;   /* engineer green */
+}
+
+/* ─── Editorial italic for the <em> inside hero/tile headlines ─────────── */
+.t-display em,
+.t-headline em,
+.tile h1 em,
+.tile h2 em {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -.005em;
+  color: var(--ink-mute);
+}
+[data-mode="dark"] .t-display em,
+[data-mode="dark"] .t-headline em,
+.tile.dark h1 em,
+.tile.dark h2 em,
+.tile.blue h1 em,
+.tile.blue h2 em {
+  color: rgba(255,255,255,.6);
+}
+/* Hero italic gets the brand color */
+.hero-tile .t-display em {
+  color: var(--signal);
+}
+
+/* ─── Hero: replace centered glyph with a signature treatment ──────────── */
+.hero-tile {
+  min-height: 760px;
+  padding-bottom: 0;
+}
+.hero-signature {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(40px, 5vw, 80px) 22px clamp(40px, 5vw, 80px);
+}
+.hero-mark {
+  position: relative;
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(96px, 16vw, 240px);
+  line-height: .9;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  text-align: center;
+  user-select: none;
+}
+.hero-mark .strike {
+  position: relative;
+  display: inline-block;
+}
+.hero-mark .strike::after {
+  content: "";
+  position: absolute;
+  left: -4%; right: -4%;
+  top: 56%;
+  height: 5px;
+  background: var(--signal);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: strike 1.4s cubic-bezier(.2,.7,.2,1) .6s forwards;
+}
+@keyframes strike {
+  to { transform: scaleX(1); }
+}
+.hero-mark .role {
+  display: block;
+  font-family: var(--f-display);
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(20px, 1.8vw, 28px);
+  line-height: 1;
+  letter-spacing: -.01em;
+  color: var(--ink-2);
+  margin-top: clamp(18px, 2vw, 28px);
+}
+.hero-mark .role::before {
+  content: "";
+  display: inline-block;
+  width: clamp(40px, 6vw, 80px);
+  height: 1px;
+  background: var(--ink-2);
+  vertical-align: middle;
+  margin-right: 12px;
+  transform: translateY(-3px);
+}
+.hero-mark .role::after {
+  content: "";
+  display: inline-block;
+  width: clamp(40px, 6vw, 80px);
+  height: 1px;
+  background: var(--ink-2);
+  vertical-align: middle;
+  margin-left: 12px;
+  transform: translateY(-3px);
+}
+
+/* Corner registration / dimension marks (engineer's drawing) */
+.hero-tile .reg {
+  position: absolute;
+  width: 22px; height: 22px;
+  border-color: var(--ink-mute);
+  border-style: solid;
+  border-width: 0;
+  z-index: 2;
+  opacity: .55;
+}
+.hero-tile .reg.tl { top: 22px; left: 22px; border-top-width: 1px; border-left-width: 1px; }
+.hero-tile .reg.tr { top: 22px; right: 22px; border-top-width: 1px; border-right-width: 1px; }
+.hero-tile .reg.bl { bottom: 22px; left: 22px; border-bottom-width: 1px; border-left-width: 1px; }
+.hero-tile .reg.br { bottom: 22px; right: 22px; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* Build stamp top-right of hero — gives a lab-notebook feel */
+.hero-stamp {
+  position: absolute;
+  top: 22px;
+  right: 56px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.5;
+  z-index: 2;
+}
+.hero-stamp .row {
+  display: flex; gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+.hero-stamp .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal-2);
+  box-shadow: 0 0 8px var(--signal-2);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% { opacity: .35; }
+}
+
+/* Hero left/right vertical labels */
+.hero-tile .side-label {
+  position: absolute;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  z-index: 2;
+}
+.hero-tile .side-label.left {
+  top: 50%;
+  left: 22px;
+  transform: rotate(-90deg) translateX(50%);
+  transform-origin: left center;
+}
+.hero-tile .side-label.right {
+  bottom: 22px;
+  right: 56px;
+}
+
+/* ─── Manifesto strip — bold editorial typographic statement ───────────── */
+.manifesto {
+  margin: 0 12px;
+  background: var(--bg);
+  padding: clamp(80px, 12vw, 160px) clamp(24px, 4vw, 56px) clamp(60px, 9vw, 120px);
+  border-bottom: 1px solid var(--hairline);
+}
+.manifesto-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  position: relative;
+}
+.manifesto-head {
+  display: flex; justify-content: space-between;
+  align-items: baseline;
+  gap: 24px;
+  margin-bottom: clamp(48px, 6vw, 80px);
+  flex-wrap: wrap;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.manifesto-head .left::before {
+  content: "◣  ";
+  color: var(--signal);
+}
+.manifesto-body {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: clamp(40px, 5.6vw, 96px);
+  line-height: 1.04;
+  letter-spacing: -.03em;
+  max-width: 22ch;
+  color: var(--ink);
+}
+:lang(th) .manifesto-body, [lang="th"] .manifesto-body {
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -.01em;
+  font-size: clamp(34px, 4.8vw, 80px);
+  max-width: 24ch;
+}
+.manifesto-body em {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--signal);
+}
+.manifesto-meta {
+  margin-top: clamp(48px, 6vw, 80px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 48px);
+  border-top: 1px solid var(--hairline);
+  padding-top: 32px;
+}
+@media (max-width: 720px) { .manifesto-meta { grid-template-columns: 1fr; gap: 24px; } }
+.manifesto-meta .row {
+  display: flex; flex-direction: column;
+  gap: 6px;
+}
+.manifesto-meta .k {
+  font-family: var(--f-mono);
+  font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.manifesto-meta .v {
+  font-family: var(--f-text);
+  font-size: 17px;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+.manifesto-meta .v em {
+  font-family: var(--f-serif);
+  font-style: italic;
+  color: var(--signal);
+}
+
+/* ─── Build-log ticker — strip showing what's being worked on now ─────── */
+.build-log {
+  margin: 0 12px;
+  background: var(--tile-dark);
+  color: #f5f5f7;
+  border-radius: 18px;
+  overflow: hidden;
+  font-family: var(--f-mono);
+  position: relative;
+}
+.build-log-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+}
+.build-log-head .live {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--signal-2);
+}
+.build-log-head .live::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--signal-2);
+  box-shadow: 0 0 8px var(--signal-2);
+  animation: pulse 2s ease-in-out infinite;
+}
+.build-log-head .spacer { flex: 1; }
+.build-log-body {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 24px;
+  padding: 0;
+}
+@media (max-width: 720px) {
+  .build-log-body { grid-template-columns: 80px 1fr; }
+  .build-log-row .tag { display: none; }
+}
+.build-log-row {
+  display: contents;
+  font-size: 13px; letter-spacing: -.005em;
+  color: rgba(255,255,255,.85);
+}
+.build-log-row > * {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  display: flex; align-items: flex-start;
+}
+.build-log-row:first-child > * { border-top: 0; }
+.build-log-row .ts {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  color: rgba(255,255,255,.45);
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+.build-log-row .ts .hash {
+  color: var(--signal);
+  font-size: 10px;
+  letter-spacing: .05em;
+}
+.build-log-row .msg {
+  font-size: 13px;
+  color: rgba(255,255,255,.88);
+  letter-spacing: -.005em;
+  line-height: 1.5;
+}
+.build-log-row .tag {
+  justify-content: flex-end;
+  font-size: 10px; letter-spacing: .1em;
+  color: rgba(255,255,255,.5);
+  text-transform: uppercase;
+}
+
+/* ─── Engineering marks on dark tiles (corner crosshairs) ──────────────── */
+.tile.dark::before, .tile.blue::before,
+.tile.dark::after,  .tile.blue::after,
+.stats-tile::before, .stats-tile::after,
+.scroll-story::before, .scroll-story::after {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  z-index: 4;
+  pointer-events: none;
+}
+.tile.dark::before, .tile.blue::before {
+  top: 20px; left: 20px;
+  border-right: 0; border-bottom: 0;
+}
+.tile.dark::after, .tile.blue::after {
+  bottom: 20px; right: 20px;
+  border-left: 0; border-top: 0;
+}
+.stats-tile { position: relative; }
+.stats-tile::before {
+  top: 20px; left: 20px;
+  border-right: 0; border-bottom: 0;
+  border-color: var(--hairline-strong);
+}
+.stats-tile::after {
+  bottom: 20px; right: 20px;
+  border-left: 0; border-top: 0;
+  border-color: var(--hairline-strong);
+}
+.scroll-story::before { top: 20px; left: 20px; border-right: 0; border-bottom: 0; }
+.scroll-story::after { bottom: 20px; right: 20px; border-left: 0; border-top: 0; }
+
+/* Tile eyebrow now uses mono so it reads like a tag/category */
+.tile-text .t-eyebrow,
+.cap-head .t-eyebrow,
+.stats-head .t-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11px !important;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+/* Cursor highlight inside hero — follows mouse */
+.hero-cursor {
+  position: absolute;
+  width: 480px; height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--signal) 28%, transparent) 0%, transparent 60%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  mix-blend-mode: normal;
+  transition: opacity .4s ease;
+  opacity: 0;
+  filter: blur(40px);
+}
+.hero-tile:hover .hero-cursor { opacity: 1; }
+[data-mode="dark"] .hero-cursor {
+  background: radial-gradient(circle, color-mix(in srgb, var(--signal) 40%, transparent) 0%, transparent 60%);
+}
+
+/* Section divider with mono label between sections */
+.section-divider {
+  margin: 0 12px;
+  padding: 36px 24px;
+  display: flex; align-items: center; gap: 16px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.section-divider .line {
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+.section-divider .num {
+  color: var(--signal);
+}
+
+/* CTA pill — adopt signal accent in studio mode */
+.cta-pill { background: var(--signal); }
+.cta-pill:hover { background: color-mix(in srgb, var(--signal) 88%, black); }
+.cta-pill.outline { color: var(--signal); border-color: var(--signal); }
+.cta-pill.outline:hover { background: var(--signal); color: #fff; }
+.tile.dark .cta-pill { background: #fff; color: var(--ink); }
+.tile.dark .cta-pill:hover { background: rgba(255,255,255,.88); }
+
+/* Override link color globally to signal for visual cohesion */
+:root { --link: var(--signal); }
+[data-mode="dark"] { --link: var(--signal); }
+
+/* Eyebrow accent dot before text — anchors the type */
+.tile-text .t-eyebrow::before,
+.cap-head .t-eyebrow::before,
+.stats-head .t-eyebrow::before {
+  content: "● ";
+  color: var(--signal);
+  margin-right: 2px;
+}
+
+/* Stats numbers: now use serif for character */
+.stat .num {
+  font-family: var(--f-display);
+  font-weight: 700;
+}
+.stat .num.serif {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -.01em;
+}
+
+/* Hero glyph fallback hidden — we use signature now */
+.hero-arena { display: none; }
