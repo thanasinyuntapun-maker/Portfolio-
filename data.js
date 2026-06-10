@@ -19,18 +19,18 @@ window.PORTFOLIO = {
 
   hero: {
     eyebrow: T("Portfolio · 2026", "Portfolio · 2026"),
-    headlinePre: T("วิศวกรที่", "Engineer who"),
-    headlineEm: T("สร้าง AI", "builds AI"),
-    headlinePost: T("ใช้งานได้จริง บน production", "that actually ships."),
+    headlinePre: T("วิศวกรเครื่องกล", "Mech engineer"),
+    headlineEm: T("ที่เขียน AI", "who also codes AI"),
+    headlinePost: T("ได้ด้วย", ""),
     sub: T(
-      "ออกแบบและเขียนระบบ AI Chatbot, Computer Vision, ระบบฝังตัว และ iOS App — ตั้งแต่ prototype จนถึง deploy บน production",
-      "AI chatbots, computer-vision pipelines, embedded systems, native iOS — shipped end-to-end from prototype to production."
+      "นศ. วิศวกรรมเครื่องกล/Robotics จุฬาฯ ที่ชอบเขียนโค้ด — ทำได้ตั้งแต่ CAN Bus, ESP32, 3D Print ไปจนถึง AI Chatbot, RAG, Computer Vision",
+      "Mech/Robotics student at Chula who happened to like coding — from CAN bus and ESP32 to AI chatbots and computer vision."
     ),
     meta: [
       { label: T("ที่ตั้ง", "Location"), value: T("กรุงเทพฯ 🇹🇭", "Bangkok 🇹🇭") },
       { label: T("การศึกษา", "Education"), value: T("จุฬาลงกรณ์มหาวิทยาลัย", "Chulalongkorn University") },
-      { label: T("ความเชี่ยวชาญ", "Focus"), value: T("AI · Robotics · Mobile", "AI · Robotics · Mobile") },
-      { label: T("ผลงาน", "Projects shipped"), value: T("17 โปรเจกต์", "17 projects") },
+      { label: T("Hardware → Software", "Hardware → Software"), value: T("ESP32 → FastAPI → LINE OA", "ESP32 → FastAPI → LINE OA") },
+      { label: T("ทำงานมาตั้งแต่", "Building since"), value: T("2023", "2023") },
     ],
   },
 

@@ -276,8 +276,8 @@
         
       <div className="contact">
         <h2 className="contact-big">
-          {L(T("มาสร้าง", "Let's build"), lang)}<br />
-          <em>{L(T("ของจริงกัน", "something real"), lang)}</em>.
+          {L(T("มีอะไร", "Got something"), lang)}<br />
+          <em>{L(T("อยู่ในหัวไหม?", "in your head?"), lang)}</em>
         </h2>
         <div className="contact-lines">
           <a className="contact-line" href={`mailto:${D.brand.email}`}>
