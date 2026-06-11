@@ -59,10 +59,10 @@
               {L(T("ดูผลงาน", "See selected work"), lang)} →
             </a>
             <a className="btn ghost" href="#contact">
-              {L(T("ติดต่อจ้างงาน", "Hire me"), lang)} →
+              {L(T("ติดต่อจ้างงาน", "Hire me"), lang)}
             </a>
+            <span className="hero-availability">{L(D.brand.availability, lang)}</span>
           </div>
-          <span className="hero-availability reveal" data-d="3">{L(D.brand.availability, lang)}</span>
         </div>
 
         <aside className="hero-meta">
@@ -175,8 +175,6 @@
                 <ArchPeek project={p} />
               </div>
 
-              <span className="work-card-bg-num" aria-hidden="true">{p.idx}</span>
-
               <span className="work-card-cta">
                 {isCase ?
                   L(T("อ่านเคสฉบับเต็ม", "Read the case study"), lang) :
@@ -238,26 +236,19 @@
           lang={lang} />
         
       <div className="cap-grid">
-        {D.capabilities.map((g, i) => {
-          const hiItems = g.items.filter((it) => it.hi);
-          const otherItems = g.items.filter((it) => !it.hi);
-          return (
-            <div className="cap" key={i}>
-              <div className="cap-hd">
-                <span className="ico">{g.ico}</span>
-                <span>{L(g.group, lang)}</span>
-              </div>
-              <div className="cap-list">
-                {hiItems.map((it) =>
-                  <span className="chip" data-hi="true" key={it.name}>{it.name}</span>
-                )}
-                {otherItems.map((it, j) =>
-                  <span className="chip" data-hi="false" key={it.name} style={j === 0 && hiItems.length > 0 ? {marginLeft:"10px"} : undefined}>{it.name}</span>
-                )}
-              </div>
+        {D.capabilities.map((g, i) =>
+          <div className="cap" key={i}>
+            <div className="cap-hd">
+              <span className="ico">{g.ico}</span>
+              <span>{L(g.group, lang)}</span>
             </div>
-          );
-        })}
+            <div className="cap-list">
+              {g.items.map((it) =>
+              <span className="chip" data-hi={!!it.hi} key={it.name}>{it.name}</span>
+              )}
+            </div>
+          </div>
+          )}
       </div>
     </section>);
 
@@ -276,8 +267,8 @@
         
       <div className="contact">
         <h2 className="contact-big">
-          {L(T("มีอะไร", "Got something"), lang)}<br />
-          <em>{L(T("อยู่ในหัวไหม?", "in your head?"), lang)}</em>
+          {L(T("มาสร้าง", "Let's build"), lang)}<br />
+          <em>{L(T("ของจริงกัน", "something real"), lang)}</em>.
         </h2>
         <div className="contact-lines">
           <a className="contact-line" href={`mailto:${D.brand.email}`}>

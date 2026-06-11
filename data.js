@@ -19,18 +19,18 @@ window.PORTFOLIO = {
 
   hero: {
     eyebrow: T("Portfolio · 2026", "Portfolio · 2026"),
-    headlinePre: T("วิศวกรเครื่องกล", "Mech engineer"),
-    headlineEm: T("ที่เขียน AI", "who also codes AI"),
-    headlinePost: T("ได้ด้วย", ""),
+    headlinePre: T("พัฒนา", "Building"),
+    headlineEm: T("AI,", "AI,"),
+    headlinePost: T("Computer Vision, ระบบฝังตัว และ iOS App", "computer vision, embedded & iOS"),
     sub: T(
-      "นศ. วิศวกรรมเครื่องกล/Robotics จุฬาฯ ที่ชอบเขียนโค้ด — ทำได้ตั้งแต่ CAN Bus, ESP32, 3D Print ไปจนถึง AI Chatbot, RAG, Computer Vision",
-      "Mech/Robotics student at Chula who happened to like coding — from CAN bus and ESP32 to AI chatbots and computer vision."
+      "นักศึกษาวิศวกรรมเครื่องกล/Robotics จุฬาฯ รับงานเขียนโค้ดและพัฒนาระบบ ตั้งแต่ฮาร์ดแวร์ (ESP32, CAN Bus, 3D Print) ไปจนถึง AI (Chatbot, RAG, Computer Vision)",
+      "Mechanical / Robotics engineering student at Chulalongkorn. From hardware (ESP32, CAN Bus, 3D Print) to AI (chatbots, RAG, computer vision)."
     ),
     meta: [
       { label: T("ที่ตั้ง", "Location"), value: T("กรุงเทพฯ 🇹🇭", "Bangkok 🇹🇭") },
       { label: T("การศึกษา", "Education"), value: T("จุฬาลงกรณ์มหาวิทยาลัย", "Chulalongkorn University") },
-      { label: T("Hardware → Software", "Hardware → Software"), value: T("ESP32 → FastAPI → LINE OA", "ESP32 → FastAPI → LINE OA") },
-      { label: T("ทำงานมาตั้งแต่", "Building since"), value: T("2023", "2023") },
+      { label: T("ความเชี่ยวชาญ", "Focus"), value: T("AI · Robotics · Mobile", "AI · Robotics · Mobile") },
+      { label: T("ผลงาน", "Projects shipped"), value: T("17 โปรเจกต์", "17 projects") },
     ],
   },
 
@@ -51,13 +51,13 @@ window.PORTFOLIO = {
       cats: ["ai"],
       feature: true,
       cat: T("AI Chatbot · LINE OA", "AI Chatbot · LINE OA"),
-      title: T("ผู้ช่วย", "An assistant"),
-      titleEm: T("ที่ไม่หลับ", "that never sleeps"),
+      title: T("แชตบอต LINE OA", "LINE OA chatbot"),
+      titleEm: T("ตอบลูกค้า 24 ชม.", "24/7 support"),
       year: "2025",
       client: T("ร้านอาหาร · เครือ 4 สาขา", "Restaurant chain · 4 branches"),
       desc: T(
-        "บอทตอบลูกค้าบน LINE OA แบบ 24 ชม. — เชื่อม Claude + RAG จากเมนู เก็บความจำต่อ user, ส่งต่อแอดมินอัตโนมัติเมื่อจับสัญญาณว่าลูกค้าต้องการคุยกับคน",
-        "24/7 LINE OA assistant — Claude + RAG over the menu, per-user memory, automatic human handoff when intent crosses a threshold."
+        "ตอบคำถามลูกค้าบน LINE OA อัตโนมัติตลอด 24 ชม. ใช้ Claude ต่อกับ RAG จากเมนูร้าน จำบทสนทนาราย user และส่งต่อแอดมินอัตโนมัติเมื่อจับได้ว่าลูกค้าต้องการคุยกับคน",
+        "Automatic 24/7 customer replies on LINE OA. Claude + RAG over the menu, per-user memory, and automatic handoff to staff when needed."
       ),
       tags: ["Claude API", "RAG / ChromaDB", "FastAPI", "LINE Messaging", "Redis"],
       role: T("Solo · 6 สัปดาห์", "Solo · 6 weeks"),
@@ -69,13 +69,13 @@ window.PORTFOLIO = {
       idx: "02",
       cats: ["ai"],
       cat: T("RAG · Document Q&A", "RAG · Document Q&A"),
-      title: T("คู่มือ", "Manuals"),
-      titleEm: T("ที่ตอบเอง", "that answer back"),
+      title: T("ถาม-ตอบจากคู่มือ PDF", "PDF manual Q&A"),
+      titleEm: T("ไทย + อังกฤษ", "Thai + English"),
       year: "2025",
       client: T("ผู้ผลิตเครื่องจักร", "Industrial OEM"),
       desc: T(
-        "ระบบถามตอบเอกสารจาก PDF technical manuals (TH+EN) — chunk ตามโครงสร้าง, citation กลับไปที่หน้าเอกสารจริง, ไม่ hallucinate",
-        "Q&A over technical PDF manuals (TH+EN). Structural chunking, hard citations back to source pages, hallucination-proof guardrails."
+        "ถาม-ตอบจากคู่มือ PDF (ไทย+อังกฤษ) แบ่ง chunk ตามโครงสร้างเอกสาร อ้างอิงกลับไปหน้าจริง และมี guardrail กัน hallucinate",
+        "Q&A over technical PDF manuals (TH+EN). Structural chunking, citations back to source pages, and guardrails against hallucination."
       ),
       tags: ["ChromaDB", "Gemini", "FastAPI", "Streamlit", "OCR"],
       role: T("Solo · 4 สัปดาห์", "Solo · 4 weeks"),
@@ -86,13 +86,13 @@ window.PORTFOLIO = {
       idx: "03",
       cats: ["cv"],
       cat: T("Computer Vision · LPR", "Computer Vision · LPR"),
-      title: T("ป้ายทะเบียน", "Plates,"),
-      titleEm: T("วินาทีต่อคัน", "one frame each"),
+      title: T("อ่านป้ายทะเบียนจาก CCTV", "License-plate reader"),
+      titleEm: T("แบบ real-time", "real-time"),
       year: "2024",
       client: T("บริษัทขนส่ง", "Logistics operator"),
       desc: T(
-        "อ่านป้ายทะเบียนรถ TH แบบ real-time จากกล้อง CCTV — รวม YOLOX + OCR ภาษาไทย + NECTEC LPR fallback",
-        "Real-time Thai LPR on a CCTV feed — YOLOX detector + Thai OCR with NECTEC LPR API fallback for tricky frames."
+        "อ่านป้ายทะเบียนรถไทยจากกล้อง CCTV แบบ real-time ใช้ YOLOX ตรวจจับร่วมกับ OCR ภาษาไทย และมี NECTEC LPR เป็น fallback",
+        "Real-time Thai license-plate reading from a CCTV feed. YOLOX detection + Thai OCR, with NECTEC LPR API as fallback."
       ),
       tags: ["YOLOX", "ONNX Runtime", "OpenCV", "NECTEC LPR", "Python"],
       role: T("Solo · 5 สัปดาห์", "Solo · 5 weeks"),
@@ -103,13 +103,13 @@ window.PORTFOLIO = {
       idx: "04",
       cats: ["robotics"],
       cat: T("Robotics · Embedded", "Robotics · Embedded"),
-      title: T("หุ่นวิ่ง", "A robot"),
-      titleEm: T("ทำงานเอง", "that minds itself"),
+      title: T("หุ่นยนต์ ESP32", "ESP32 robot"),
+      titleEm: T("CAN Bus + PID", "CAN Bus + PID"),
       year: "2024",
       client: T("โปรเจกต์ของตัวเอง", "Personal R&D"),
       desc: T(
-        "Differential-drive robot ควบคุมด้วย ESP32 · CAN Bus เชื่อมเซ็นเซอร์ · PID loop ปรับ velocity · ส่ง telemetry ขึ้น Telegram",
-        "Differential-drive bot on ESP32 — CAN-bus sensor mesh, PID velocity loop, live telemetry on Telegram."
+        "หุ่นยนต์ขับเคลื่อนสองล้อ ควบคุมด้วย ESP32 ต่อเซ็นเซอร์ผ่าน CAN Bus ใช้ PID คุมความเร็ว และส่ง telemetry ขึ้น Telegram",
+        "Differential-drive robot on ESP32. CAN-bus sensor mesh, PID velocity loop, and live telemetry on Telegram."
       ),
       tags: ["ESP32", "Arduino C++", "CAN / MCP2515", "PID", "MQTT"],
       role: T("Solo · 8 สัปดาห์", "Solo · 8 weeks"),
@@ -120,13 +120,13 @@ window.PORTFOLIO = {
       idx: "05",
       cats: ["mobile"],
       cat: T("iOS · SwiftUI", "iOS · SwiftUI"),
-      title: T("MVP iPhone", "An iPhone MVP"),
-      titleEm: T("เพียง 3 สัปดาห์", "in three weeks"),
+      title: T("iOS App (SwiftUI)", "iOS app (SwiftUI)"),
+      titleEm: T("ส่ง TestFlight ใน 3 สัปดาห์", "shipped in 3 weeks"),
       year: "2025",
       client: T("Startup ระยะ Seed", "Seed-stage startup"),
       desc: T(
-        "Native iOS app ด้วย SwiftUI + SwiftData (iOS 17+) — auth, sync, push, offline mode พร้อม dashboard สำหรับแอดมิน",
-        "Native iOS app on SwiftUI + SwiftData (iOS 17+) — auth, sync, push, offline mode, admin dashboard."
+        "แอป iOS ด้วย SwiftUI + SwiftData (iOS 17+) มี auth, sync, push, offline mode พร้อม dashboard สำหรับแอดมิน",
+        "Native iOS app on SwiftUI + SwiftData (iOS 17+). Auth, sync, push, offline mode, and an admin dashboard."
       ),
       tags: ["SwiftUI", "SwiftData", "xcodegen", "WebRTC"],
       role: T("Solo · 3 สัปดาห์", "Solo · 3 weeks"),
@@ -137,13 +137,13 @@ window.PORTFOLIO = {
       idx: "06",
       cats: ["cv"],
       cat: T("Computer Vision · FER", "Computer Vision · FER"),
-      title: T("ห้องเรียน", "A classroom"),
-      titleEm: T("ที่อ่านอารมณ์", "that reads the room"),
+      title: T("วิเคราะห์ความสนใจในห้องเรียน", "Classroom engagement"),
+      titleEm: T("ด้วย FER", "with FER"),
       year: "2024",
       client: T("โครงงานวิจัยมหา'ลัย", "University research"),
       desc: T(
-        "วิเคราะห์ความสนใจในชั้นเรียน real-time ผ่าน FER + face mesh — dashboard สำหรับอาจารย์, anonymised",
-        "Live engagement monitor — FER + face mesh, anonymised per-row aggregates on a teacher dashboard."
+        "วัดความสนใจของนักเรียนในชั้นเรียนแบบ real-time ด้วย FER + face mesh สรุปผลแบบไม่ระบุตัวตนบน dashboard ของอาจารย์",
+        "Real-time classroom engagement via FER + face mesh, shown as anonymised aggregates on a teacher dashboard."
       ),
       tags: ["TensorFlow", "FER", "OpenCV", "Streamlit"],
       role: T("Pair · 6 สัปดาห์", "Pair · 6 weeks"),
@@ -154,13 +154,13 @@ window.PORTFOLIO = {
       idx: "07",
       cats: ["sim"],
       cat: T("Simulation · MATLAB", "Simulation · MATLAB"),
-      title: T("แขนหุ่น", "Robot arm,"),
-      titleEm: T("ใน simulink", "tuned in Simulink"),
+      title: T("จำลองแขนกล 6-DOF", "6-DOF arm simulation"),
+      titleEm: T("ใน Simulink", "in Simulink"),
       year: "2024",
       client: T("ส่วนหนึ่งของวิทยานิพนธ์", "Thesis component"),
       desc: T(
-        "Inverse kinematics + dynamics ของแขนหุ่น 6-DOF — model ใน Simulink, ตรวจ controller ก่อนสร้างจริง",
-        "6-DOF arm IK + dynamics in Simulink — verified controller behaviour before any hardware was cut."
+        "คำนวณ inverse kinematics และ dynamics ของแขนกล 6-DOF จำลองใน Simulink เพื่อตรวจ controller ก่อนสร้างจริง",
+        "6-DOF arm inverse kinematics + dynamics in Simulink, to verify the controller before building hardware."
       ),
       tags: ["MATLAB", "Simulink", "Robotics Toolbox"],
       role: T("Solo · 10 สัปดาห์", "Solo · 10 weeks"),
@@ -171,13 +171,13 @@ window.PORTFOLIO = {
       idx: "08",
       cats: ["mfg"],
       cat: T("CAD · 3D Print", "CAD · 3D Print"),
-      title: T("ชิ้นงาน", "Parts you can"),
-      titleEm: T("จับต้องได้จริง", "actually hold"),
+      title: T("ออกแบบชิ้นงาน CAD", "CAD part design"),
+      titleEm: T("ผลิตด้วย 3D Print", "3D-printed"),
       year: "2024",
       client: T("ลูกค้า 6 รายที่ผ่านมา", "6 past clients"),
       desc: T(
-        "ออกแบบ mechanical parts ใน Fusion 360 / SolidWorks — engineering drawing, BOQ, ผลิตจริงด้วย FDM",
-        "Mechanical part design in Fusion 360 / SolidWorks — engineering drawings, BOQ, FDM-printed and shipped."
+        "ออกแบบชิ้นงานกลใน Fusion 360 / SolidWorks ทำ engineering drawing และ BOQ แล้วผลิตจริงด้วย FDM",
+        "Mechanical part design in Fusion 360 / SolidWorks. Engineering drawings, BOQ, and FDM-printed parts."
       ),
       tags: ["Fusion 360", "SolidWorks", "FDM", "DFM"],
       role: T("Solo · ต่อโปรเจกต์", "Solo · per project"),
@@ -191,8 +191,8 @@ window.PORTFOLIO = {
       tag: T("ยอดนิยม", "Most popular"),
       title: T("AI Chatbot — LINE OA / Facebook", "AI Chatbot — LINE OA / Facebook"),
       desc: T(
-        "บอทตอบลูกค้าอัตโนมัติ 24 ชม. รองรับ AI หลายแบบ, ความจำต่อ user, ส่งต่อแอดมินอัตโนมัติ, OCR อ่านสลิป/ที่อยู่ในแชต",
-        "Always-on assistant for LINE OA / Messenger — multi-LLM, per-user memory, automatic human handoff, slip/address OCR inline."
+        "บอตตอบลูกค้าอัตโนมัติ 24 ชม. บน LINE OA / Facebook รองรับหลายโมเดล จำบทสนทนาราย user ส่งต่อแอดมินอัตโนมัติ และ OCR อ่านสลิป/ที่อยู่ในแชต",
+        "24/7 customer bot for LINE OA / Messenger. Multi-LLM, per-user memory, automatic handoff, and inline slip / address OCR."
       ),
       bullets: ["LINE Messaging", "Facebook Graph", "Claude / Gemini", "Conversation memory"],
       price: T("เริ่มที่ 35,000 บาท", "From ฿35,000"),
@@ -200,11 +200,11 @@ window.PORTFOLIO = {
     },
     {
       num: "02",
-      tag: T("มูลค่าสูง", "High value"),
+      tag: T("งาน AI", "AI"),
       title: T("RAG Document Q&A System", "RAG Document Q&A System"),
       desc: T(
-        "ระบบถามตอบจากเอกสารของคุณ (manual, knowledge base, สัญญา) ตอบตรงประเด็น มี citation, ไม่ hallucinate",
-        "Question-answer system grounded in your documents — citations to source pages, evals included, no hallucinations."
+        "ระบบถาม-ตอบจากเอกสารของคุณ (คู่มือ, knowledge base, สัญญา) ตอบพร้อม citation อ้างหน้าจริง มี evaluation และไม่ hallucinate",
+        "Question-answer system grounded in your documents. Citations to source pages, evaluation included, no hallucinations."
       ),
       bullets: ["ChromaDB", "PDF + OCR", "Evaluation harness", "Streamlit admin"],
       price: T("เริ่มที่ 55,000 บาท", "From ฿55,000"),
@@ -215,8 +215,8 @@ window.PORTFOLIO = {
       tag: T("งานวิศวกรรม", "Engineering"),
       title: T("Computer Vision Pipeline", "Computer Vision Pipeline"),
       desc: T(
-        "อ่านป้ายทะเบียน, ตรวจจับวัตถุ, OCR ภาษาไทย, วิเคราะห์ภาพ CCTV / webcam แบบ real-time — deploy ขึ้น edge หรือ cloud",
-        "License-plate recognition, object detection, Thai OCR, CCTV / webcam analysis — deployed to edge or cloud."
+        "อ่านป้ายทะเบียน ตรวจจับวัตถุ OCR ภาษาไทย และวิเคราะห์ภาพจาก CCTV / webcam แบบ real-time deploy ขึ้น edge หรือ cloud",
+        "License-plate recognition, object detection, Thai OCR, and CCTV / webcam analysis in real time. Deploys to edge or cloud."
       ),
       bullets: ["YOLOX / ONNX", "OpenCV", "NECTEC LPR", "Docker"],
       price: T("เริ่มที่ 60,000 บาท", "From ฿60,000"),
@@ -227,8 +227,8 @@ window.PORTFOLIO = {
       tag: T("งานวิศวกรรม", "Engineering"),
       title: T("Robotics & Embedded Firmware", "Robotics & Embedded Firmware"),
       desc: T(
-        "เขียน firmware ESP32 / Arduino, ระบบ control PID, CAN Bus, เชื่อม IoT กับ Telegram / LINE",
-        "ESP32 / Arduino firmware, PID control, CAN-bus integration, IoT plumbed to Telegram / LINE bots."
+        "เขียน firmware ESP32 / Arduino ระบบควบคุม PID, CAN Bus และต่อ IoT เข้ากับ Telegram / LINE",
+        "ESP32 / Arduino firmware, PID control, CAN-bus integration, and IoT linked to Telegram / LINE."
       ),
       bullets: ["ESP32", "PID", "CAN / MCP2515", "MQTT"],
       price: T("เริ่มที่ 40,000 บาท", "From ฿40,000"),
@@ -239,8 +239,8 @@ window.PORTFOLIO = {
       tag: T("Mobile", "Mobile"),
       title: T("iOS App (SwiftUI)", "iOS App (SwiftUI)"),
       desc: T(
-        "พัฒนา iPhone app ด้วย SwiftUI + SwiftData (iOS 17+) — เหมาะกับ MVP, internal tool, หรือต่อระบบเดิม",
-        "Native iPhone app on SwiftUI + SwiftData (iOS 17+) — great fit for MVPs, internal tools, or extending an existing system."
+        "แอป iPhone ด้วย SwiftUI + SwiftData (iOS 17+) เหมาะกับ MVP, internal tool หรือต่อยอดระบบเดิม",
+        "Native iPhone app on SwiftUI + SwiftData (iOS 17+). Good for MVPs, internal tools, or extending an existing system."
       ),
       bullets: ["SwiftUI", "SwiftData", "TestFlight", "Push"],
       price: T("เริ่มที่ 75,000 บาท", "From ฿75,000"),
@@ -251,7 +251,7 @@ window.PORTFOLIO = {
       tag: T("Manufacturing", "Manufacturing"),
       title: T("CAD Design & 3D Printing", "CAD Design & 3D Printing"),
       desc: T(
-        "ออกแบบ mechanical parts ใน Fusion 360, engineering drawing พร้อม BOQ, ผลิต 3D Print ส่งของจริง",
+        "ออกแบบชิ้นงานกลใน Fusion 360 ทำ engineering drawing พร้อม BOQ และผลิต 3D Print ส่งของจริง",
         "Mechanical design in Fusion 360, engineering drawings with BOQ, FDM 3D-printed and delivered."
       ),
       bullets: ["Fusion 360", "DFM review", "FDM print", "BOQ"],
@@ -263,8 +263,8 @@ window.PORTFOLIO = {
       tag: T("Automation", "Automation"),
       title: T("งานเอกสาร Excel · Automation", "Excel Documents · Automation"),
       desc: T(
-        "ทำไฟล์ Excel · Google Sheets ให้คำนวณ–สรุป–ออกรายงานอัตโนมัติ — สูตร, VBA / Apps Script, dashboard, เชื่อม API หรือ LINE Notify",
-        "Excel / Google Sheets that calculate, summarise, and export reports on their own — formulas, VBA / Apps Script, dashboards, API or LINE Notify hooks."
+        "ทำไฟล์ Excel / Google Sheets ให้คำนวณ สรุป และออกรายงานอัตโนมัติ ทั้งสูตร, VBA / Apps Script, dashboard และต่อ API หรือ LINE Notify",
+        "Excel / Google Sheets that calculate, summarise, and export reports automatically. Formulas, VBA / Apps Script, dashboards, API or LINE Notify."
       ),
       bullets: ["VBA · Macro", "Apps Script", "Pivot · Dashboard", "API / LINE Notify"],
       price: T("เริ่มที่ 4,000 บาท", "From ฿4,000"),
