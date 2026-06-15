@@ -114,11 +114,10 @@ function App() {
           <a className="link" href="#services">{tr(T('บริการ', 'Services'))}</a>
           <a className="link" href="#skills">{tr(T('ทักษะ', 'Skills'))}</a>
           <a className="link" href="#contact">{tr(T('ติดต่อ', 'Contact'))}</a>
-          <span className="nav-sep"></span>
-          <div className="lang-toggle">
-            <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
-            <button className={lang === 'th' ? 'active' : ''} onClick={() => setLang('th')}>TH</button>
-          </div>
+        </div>
+        <div className="lang-toggle">
+          <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
+          <button className={lang === 'th' ? 'active' : ''} onClick={() => setLang('th')}>TH</button>
         </div>
       </nav>
 

@@ -287,10 +287,10 @@ window.PORTFOLIO = {
       title: T("AI Chatbot", "AI Chatbot"),
       titleSub: T("LINE OA · Facebook · Web", "LINE OA · Facebook · Web"),
       desc: T(
-        "Claude AI ตอบลูกค้าบน LINE OA / Facebook แบบเป็นธรรมชาติ 24 ชม. จำชื่อและประวัติบทสนทนาของลูกค้าแต่ละคน อ่านสลิปโอน ที่อยู่ และภาพในแชตได้ทันที ส่งต่อแอดมินอัตโนมัติเมื่อจำเป็น — ลดภาระทีม 50–70%",
-        "Claude AI handles LINE OA / Messenger conversations naturally, 24/7. Remembers each customer's history, reads slips and images inline, and escalates to staff only when truly needed — typically cuts team load 50–70%."
+        "AI ตอบลูกค้าบน LINE OA / Facebook แบบเป็นธรรมชาติ 24 ชม. จำชื่อและประวัติบทสนทนาของลูกค้าแต่ละคน อ่านสลิปโอน ที่อยู่ และภาพในแชตได้ทันที ส่งต่อแอดมินอัตโนมัติเมื่อจำเป็น — ลดภาระทีม 50–70%",
+        "AI handles LINE OA / Messenger conversations naturally, 24/7. Remembers each customer's history, reads slips and images inline, and escalates to staff only when truly needed — typically cuts team load 50–70%."
       ),
-      bullets: ["Claude API (ภาษาไทย)", "LINE + Facebook Graph", "จำลูกค้าราย user", "Vision OCR อ่านสลิป"],
+      bullets: ["Natural Language AI", "LINE + Facebook Graph", "Per-user Memory", "Vision OCR"],
       price: T("เริ่มที่ 35,000 บาท", "From ฿35,000"),
       time: T("4–6 สัปดาห์", "4–6 weeks"),
     },
@@ -300,10 +300,10 @@ window.PORTFOLIO = {
       title: T("Document AI & RAG", "Document AI & RAG"),
       titleSub: T("ถาม-ตอบจากเอกสารคุณ", "Q&A from your documents"),
       desc: T(
-        "Claude อ่านเอกสารทั้งหมดของคุณพร้อมกัน (context 200,000 token) ไม่ว่าจะเป็นคู่มือ, policy, สัญญา หรือ knowledge base ตอบพร้อมอ้างอิงหน้าจริง ไม่ hallucinate รองรับภาษาไทย-อังกฤษ มี evaluation วัดความแม่น",
-        "Claude reads your entire knowledge base at once (200K-token context) — manuals, policies, contracts — and answers with exact page citations. Zero hallucinations, Thai + English, built-in accuracy evaluation."
+        "AI อ่านเอกสารทั้งหมดของคุณพร้อมกัน (context 200,000 token) ไม่ว่าจะเป็นคู่มือ, policy, สัญญา หรือ knowledge base ตอบพร้อมอ้างอิงหน้าจริง ไม่ hallucinate รองรับภาษาไทย-อังกฤษ มี evaluation วัดความแม่น",
+        "AI reads your entire knowledge base at once (200K-token context) — manuals, policies, contracts — and answers with exact page citations. Zero hallucinations, Thai + English, built-in accuracy evaluation."
       ),
-      bullets: ["Claude 200K context", "PDF + OCR ไทย-อังกฤษ", "Citation ทุกคำตอบ", "Evaluation harness"],
+      bullets: ["200K-Token Context", "PDF + Thai OCR", "Page Citations", "Eval Harness"],
       price: T("เริ่มที่ 55,000 บาท", "From ฿55,000"),
       time: T("3–5 สัปดาห์", "3–5 weeks"),
     },
@@ -313,10 +313,10 @@ window.PORTFOLIO = {
       title: T("AI Vision & OCR", "AI Vision & OCR"),
       titleSub: T("อ่านภาพ · เอกสาร · สลิป", "Images · Documents · Slips"),
       desc: T(
-        "Claude Vision อ่านใบเสร็จ สลิปโอน บัตรประชาชน ป้ายทะเบียน ฟอร์ม และภาพสินค้า ดึงข้อมูลออกเป็น JSON พร้อมใช้ ส่งเข้า database หรือแจ้ง LINE Notify ได้ทันที แม่นภาษาไทย ไม่ต้องพิมพ์ข้อมูลเอง",
-        "Claude Vision reads receipts, transfer slips, ID cards, license plates, forms, and product images — extracts clean JSON and pushes it straight to a database or LINE Notify. Accurate Thai OCR, zero manual entry."
+        "Multimodal AI อ่านใบเสร็จ สลิปโอน บัตรประชาชน ป้ายทะเบียน ฟอร์ม และภาพสินค้า ดึงข้อมูลออกเป็น JSON พร้อมใช้ ส่งเข้า database หรือแจ้ง LINE Notify ได้ทันที แม่นภาษาไทย ไม่ต้องพิมพ์ข้อมูลเอง",
+        "Multimodal AI reads receipts, transfer slips, ID cards, license plates, forms, and product images — extracts clean JSON and pushes it straight to a database or LINE Notify. Accurate Thai OCR, zero manual entry."
       ),
-      bullets: ["Claude Vision (multimodal)", "ใบเสร็จ · สลิป · บัตร", "Output JSON พร้อมใช้", "ต่อ LINE / Database"],
+      bullets: ["Multimodal Vision AI", "ใบเสร็จ · สลิป · บัตร", "JSON Output พร้อมใช้", "ต่อ LINE / Database"],
       price: T("เริ่มที่ 25,000 บาท", "From ฿25,000"),
       time: T("2–4 สัปดาห์", "2–4 weeks"),
     },
@@ -326,10 +326,10 @@ window.PORTFOLIO = {
       title: T("AI Agent & Automation", "AI Agent & Automation"),
       titleSub: T("ระบบอัตโนมัติด้วย Claude", "Claude-powered workflows"),
       desc: T(
-        "Claude ทำงานแบบ multi-step อัตโนมัติ — ดึงข้อมูลจาก API ภายนอก วิเคราะห์ ตัดสินใจ เขียนรายงาน และส่งต่อผลลัพธ์ไปยังช่องทางที่ต้องการ เหมาะกับงานซ้ำๆ ที่ต้องการ intelligence เช่น สรุป email ตรวจสอบออเดอร์ หรืออัปเดต sheet อัตโนมัติ",
-        "Claude runs multi-step jobs autonomously — fetches data from external APIs, analyses, decides, writes reports, and delivers results wherever you need them. Perfect for repetitive intelligent tasks: email summaries, order checks, auto-updating sheets."
+        "AI ทำงานแบบ multi-step อัตโนมัติ — ดึงข้อมูลจาก API ภายนอก วิเคราะห์ ตัดสินใจ เขียนรายงาน และส่งต่อผลลัพธ์ไปยังช่องทางที่ต้องการ เหมาะกับงานซ้ำๆ ที่ต้องการ intelligence เช่น สรุป email ตรวจสอบออเดอร์ หรืออัปเดต sheet อัตโนมัติ",
+        "AI runs multi-step jobs autonomously — fetches data from external APIs, analyses, decides, writes reports, and delivers results wherever you need them. Perfect for repetitive intelligent tasks: email summaries, order checks, auto-updating sheets."
       ),
-      bullets: ["Claude Tool Use", "ต่อ API ภายนอก", "Scheduled jobs", "Google Sheets · LINE · Email"],
+      bullets: ["Agentic AI Workflows", "ต่อ API ภายนอก", "Scheduled Jobs", "Sheets · LINE · Email"],
       price: T("เริ่มที่ 45,000 บาท", "From ฿45,000"),
       time: T("3–6 สัปดาห์", "3–6 weeks"),
     },
@@ -389,18 +389,17 @@ window.PORTFOLIO = {
 
   capabilities: [
     {
-      group: T("Claude AI", "Claude AI"),
+      group: T("AI & LLM", "AI & LLM"),
       ico: "✦",
       items: [
-        { name: "Claude Sonnet 4.5 (latest)", hi: true },
-        { name: "200K Token Context", hi: true },
-        { name: "Vision · Multimodal", hi: true },
-        { name: "Tool Use / Function Calling", hi: true },
-        { name: "RAG + ChromaDB", hi: true },
-        { name: "Thai · English (bilingual)", hi: true },
-        { name: "Google Gemini 2.0 Flash" },
-        { name: "OpenAI GPT-4o" },
+        { name: "200K-Token Context Window", hi: true },
+        { name: "Vision & Document Reading", hi: true },
+        { name: "Agentic Tool Use", hi: true },
+        { name: "RAG / ChromaDB", hi: true },
+        { name: "Thai + English Bilingual", hi: true },
+        { name: "LLM API Integration", hi: true },
         { name: "NECTEC AI for Thai" },
+        { name: "Prompt Engineering" },
       ],
     },
     {
