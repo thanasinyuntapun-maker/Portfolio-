@@ -2,7 +2,7 @@
 
 ระบบวัดความสนใจนักเรียนแบบ real-time ผ่านกล้อง ทำงานทั้งหมดใน browser ไม่มี server
 
-**Live demo:** [classroom-attention-v3.html](https://thanasinyuntapun-maker.github.io/Portfolio-/classroom-attention-v3.html)
+**Live demo:** [thanasinyuntapun-maker.github.io/Portfolio-/projects/classroom-attention/](https://thanasinyuntapun-maker.github.io/Portfolio-/projects/classroom-attention/)
 
 ---
 
@@ -44,6 +44,6 @@ Score = EAR × 0.4 + HeadPose × 0.35 + Gaze × 0.25
 
 ## วิธีใช้
 
-เปิดไฟล์ `classroom-attention-v3.html` ในเบราว์เซอร์ที่รองรับ WebGL (Chrome/Edge แนะนำ) — ไม่ต้อง build หรือติดตั้ง
+เปิด URL ด้านบนหรือไฟล์ `index.html` ในเบราว์เซอร์ที่รองรับ WebGL (Chrome/Edge แนะนำ) — ไม่ต้อง build หรือติดตั้ง
 
 > ต้องอนุญาตกล้องเมื่อเบราว์เซอร์ถาม ข้อมูลทั้งหมดอยู่ใน device ไม่ส่งออกไปภายนอก

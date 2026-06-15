@@ -2,7 +2,7 @@
 
 Multi-DOF shear building dynamics simulator — eigensolver, mode shapes, FRF, time integration และ vibration control ทั้งหมดเขียน pure JS
 
-**Live demo:** [shear-building-simulator.html](https://thanasinyuntapun-maker.github.io/Portfolio-/shear-building-simulator.html)
+**Live demo:** [thanasinyuntapun-maker.github.io/Portfolio-/projects/shear-building/](https://thanasinyuntapun-maker.github.io/Portfolio-/projects/shear-building/)
 
 ---
 
@@ -59,4 +59,4 @@ Newmark-β (β=0.25, γ=0.5 — constant average acceleration):
 
 ## วิธีใช้
 
-เปิดไฟล์ `shear-building-simulator.html` ในเบราว์เซอร์ — ไม่ต้อง build หรือ server
+เปิด URL ด้านบนหรือไฟล์ `index.html` ในเบราว์เซอร์ — ไม่ต้อง build หรือ server

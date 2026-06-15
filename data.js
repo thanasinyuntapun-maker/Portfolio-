@@ -199,8 +199,8 @@ window.PORTFOLIO = {
       tags: ["MediaPipe", "Face Landmarker", "EAR", "Head Pose", "Gaze", "WebGL", "Vanilla JS"],
       role: T("Solo · 1 สัปดาห์", "Solo · 1 week"),
       outcome: T("3 สัญญาณ on-device real-time", "3 on-device signals, real-time"),
-      liveUrl: "classroom-attention-v3.html",
-      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/blob/main/classroom-attention-v3.html",
+      liveUrl: "projects/classroom-attention/",
+      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/classroom-attention",
     },
     {
       id: "shear-building",
@@ -218,8 +218,8 @@ window.PORTFOLIO = {
       tags: ["Structural Dynamics", "Eigenvalue / Jacobi", "Newmark-β", "TMD", "FRF", "Pure JS"],
       role: T("Solo · 2 สัปดาห์", "Solo · 2 weeks"),
       outcome: T("TMD ลด amplitude 60%+", "TMD reduces amplitude 60%+"),
-      liveUrl: "shear-building-simulator.html",
-      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/blob/main/shear-building-simulator.html",
+      liveUrl: "projects/shear-building/",
+      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/shear-building",
     },
   ],
 
