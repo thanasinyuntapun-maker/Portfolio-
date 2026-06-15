@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stark Industries : Hand Tracking Interface</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; }
+        #jarvis-bg { width: 100vw; height: 100vh; position: absolute; z-index: -1; }
+        
+        /* กล้อง (ซ่อนไว้ ไม่ต้องให้เห็นหน้าเรา) */
+        .input_video { display: none; }
+
+        /* จุดเล็ง (Cursor) เพื่อให้รู้ว่าคอมเห็นมือเราตรงไหน */
+        #cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ffff; /* สีฟ้า Arc Reactor */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: 0 0 10px #00ffff;
+            transition: all 0.1s ease;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-family: monospace;
+            font-size: 20px;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="jarvis-bg"></div>
+    
+    <div id="cursor"></div>
+    
+    <div id="status" class="loading">INITIALIZING J.A.R.V.I.S...</div>
+
+    <video class="input_video"></video>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <script>
+        const videoElement = document.getElementsByClassName('input_video')[0];
+        const cursor = document.getElementById('cursor');
+        const statusText = document.getElementById('status');
+        
+        // --- 1. เริ่มระบบ Vanta (กราฟิก) ---
+        const vantaEffect = VANTA.NET({
+            el: "#jarvis-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x33b5e5,      // สีฟ้า
+            backgroundColor: 0x050505,
+            points: 15.00,
+            maxDistance: 22.00,
+            spacing: 18.00
+        });
+
+        // --- 2. ฟังก์ชันเมื่อ AI เห็นมือ ---
+        function onResults(results) {
+            statusText.style.display = 'none'; // ซ่อนข้อความโหลด
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                // เอามือแรกที่เจอ
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // จุดที่ 8 คือ "ปลายนิ้วชี้"
+                const indexFinger = landmarks[8];
+
+                // แปลงค่า 0-1 ให้เป็นขนาดหน้าจอ
+                // หมายเหตุ: ต้องกลับด้าน X (1 - x) เพราะกล้องเหมือนกระจกเงา
+                const x = (1 - indexFinger.x) * window.innerWidth;
+                const y = indexFinger.y * window.innerHeight;
+
+                // 1. ขยับ Cursor วงกลม
+                cursor.style.left = x + 'px';
+                cursor.style.top = y + 'px';
+
+                // 2. หลอก Vanta ว่าเมาส์ขยับ (Hack)
+                // เราส่ง Event ปลอมไปที่ window เพื่อให้ Vanta รับรู้
+                const mouseEvent = new MouseEvent('mousemove', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: x,
+                    clientY: y
+                });
+                document.body.dispatchEvent(mouseEvent);
+            }
+        }
+
+        // --- 3. ตั้งค่า MediaPipe Hands ---
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+        
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        
+        hands.onResults(onResults);
+
+        // --- 4. เปิดกล้อง ---
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 1280,
+            height: 720
+        });
+        
+        camera.start();
+    </script>
+</body>
+</html>

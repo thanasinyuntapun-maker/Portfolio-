@@ -221,6 +221,63 @@ window.PORTFOLIO = {
       liveUrl: "projects/shear-building/",
       githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/shear-building",
     },
+    {
+      id: "eye-gaze-particles",
+      idx: "11",
+      cats: ["cv"],
+      cat: T("Computer Vision · MediaPipe", "Computer Vision · MediaPipe"),
+      title: T("ควบคุม Particle", "Eye-controlled"),
+      titleEm: T("ด้วยสายตา", "particle system"),
+      year: "2025",
+      client: T("โปรเจกต์ส่วนตัว", "Personal project"),
+      desc: T(
+        "Particle 1,500 จุดลอยตามทิศสายตา — MediaPipe FaceMesh ติดตาม iris แบบ real-time กระพริบตา = Black Hole Effect ดูดรวมทุก particle เข้าหาศูนย์กลาง ทำงานใน browser ไม่มี server",
+        "1,500 Three.js particles follow your gaze in real time via MediaPipe FaceMesh iris tracking. Blink to trigger a black hole effect — all particles rush to the gaze centre. Zero server."
+      ),
+      tags: ["MediaPipe FaceMesh", "Iris Tracking", "Three.js", "WebGL", "Vanilla JS"],
+      role: T("Solo", "Solo"),
+      outcome: T("Iris tracking real-time 30fps", "Real-time iris tracking @ 30 fps"),
+      liveUrl: "projects/eye-gaze-particles/",
+      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/eye-gaze-particles",
+    },
+    {
+      id: "jarvis-hand",
+      idx: "12",
+      cats: ["cv"],
+      cat: T("Computer Vision · MediaPipe", "Computer Vision · MediaPipe"),
+      title: T("J.A.R.V.I.S.", "J.A.R.V.I.S."),
+      titleEm: T("Hand Interface", "Hand Interface"),
+      year: "2025",
+      client: T("โปรเจกต์ส่วนตัว", "Personal project"),
+      desc: T(
+        "อินเทอร์เฟซสไตล์ Iron Man — MediaPipe Hands ติดตามปลายนิ้วชี้ขยับ Vanta.js network background แบบ real-time dispatch MouseEvent ปลอมเพื่อควบคุม animation",
+        "Iron Man–style HUD — MediaPipe Hands tracks the index fingertip and dispatches synthetic mouse events to drive a Vanta.js network background in real time."
+      ),
+      tags: ["MediaPipe Hands", "Vanta.js", "Three.js", "Hand Tracking", "Vanilla JS"],
+      role: T("Solo", "Solo"),
+      outcome: T("Hand-driven UI real-time", "Real-time hand-driven UI"),
+      liveUrl: "projects/jarvis-hand/",
+      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/jarvis-hand",
+    },
+    {
+      id: "hand-particles",
+      idx: "13",
+      cats: ["cv"],
+      cat: T("Computer Vision · MediaPipe", "Computer Vision · MediaPipe"),
+      title: T("Particle", "Particle"),
+      titleEm: T("ตามมือ", "hand control"),
+      year: "2025",
+      client: T("โปรเจกต์ส่วนตัว", "Personal project"),
+      desc: T(
+        "ควบคุม particle 2,000 จุดด้วยมือ — แบมือ = ผลักออก, กำมือ = ดูดรวม MediaPipe Hands ตรวจจับท่ามือจากระยะปลายนิ้วถึงข้อมือ ทำงานใน browser ล้วน",
+        "2,000 Three.js particles controlled by hand pose — open hand repels, fist attracts. MediaPipe Hands detects pose from fingertip-to-wrist distance. Fully in-browser."
+      ),
+      tags: ["MediaPipe Hands", "Fist Detection", "Three.js", "WebGL", "Vanilla JS"],
+      role: T("Solo", "Solo"),
+      outcome: T("Gesture-driven particles real-time", "Real-time gesture-driven particles"),
+      liveUrl: "projects/hand-particles/",
+      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/hand-particles",
+    },
   ],
 
   services: [

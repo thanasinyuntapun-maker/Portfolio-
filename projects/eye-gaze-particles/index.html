@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eye Gaze Particle System</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        video { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 320px; height: 240px; 
+            transform: scaleX(-1); /* กลับด้านกล้องให้เหมือนกระจก */
+            opacity: 0.2; /* จางๆ ไว้เช็คตำแหน่งตา */
+            z-index: 10;
+        } 
+        #loading {
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            color: #00ffff; font-family: monospace; font-size: 20px;
+            pointer-events: none;
+        }
+        #guide {
+            position: absolute; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            color: white; font-family: monospace;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">INITIALIZING OCULAR SYSTEM...</div>
+    <video id="input_video"></video>
+    <div id="guide">LOOK AROUND TO MOVE / BLINK TO ACTIVATE</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+    <script>
+        // --- 1. SETUP THREE.JS ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. PARTICLES ---
+        const particleCount = 1500;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = new Float32Array(particleCount * 3); // เก็บความเร็ว
+
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 100;
+            velocities[i] = 0;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        const material = new THREE.PointsMaterial({
+            color: 0x00ffff,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // --- 3. GAZE LOGIC ---
+        let targetX = 0;
+        let targetY = 0;
+        let isBlinking = false;
+        
+        // จุดอ้างอิงของตา (Landmark Indices)
+        // 468 = Left Iris Center, 473 = Right Iris Center
+        // 33 = Left Eye Inner, 133 = Left Eye Outer (สำหรับวัดความกว้างตา)
+        // 159 = Left Eye Top, 145 = Left Eye Bottom (สำหรับวัดการกระพริบตา)
+
+        function onResults(results) {
+            document.getElementById('loading').style.display = 'none';
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                const landmarks = results.multiFaceLandmarks[0];
+
+                // 1. ตรวจจับการกระพริบตา (Blink Detection)
+                // คำนวณระยะห่างเปลือกตาบน-ล่าง
+                const leftEyeTop = landmarks[159];
+                const leftEyeBottom = landmarks[145];
+                const rightEyeTop = landmarks[386];
+                const rightEyeBottom = landmarks[374];
+
+                const leftOpen = Math.abs(leftEyeTop.y - leftEyeBottom.y);
+                const rightOpen = Math.abs(rightEyeTop.y - rightEyeBottom.y);
+
+                // ถ้าตาทั้งสองข้างปิดลง (ค่าน้อยกว่า 0.015 ลองปรับได้ตามแสง)
+                if (leftOpen < 0.012 && rightOpen < 0.012) {
+                    isBlinking = true;
+                    material.color.setHex(0xff0055); // เปลี่ยนเป็นสีแดง
+                } else {
+                    isBlinking = false;
+                    material.color.setHex(0x00ffff); // สีฟ้า
+                }
+
+                // 2. คำนวณทิศทางการมอง (Gaze Tracking)
+                // ใช้ Iris (ตาดำ) เทียบกับหัวตาและหางตา
+                const leftIris = landmarks[468];
+                const leftInner = landmarks[33]; // หัวตาซ้าย
+                const leftOuter = landmarks[133]; // หางตาซ้าย
+
+                // คำนวณความกว้างของตา
+                const eyeWidth = Math.abs(leftOuter.x - leftInner.x);
+                
+                // หาตำแหน่งสัมพัทธ์ของตาดำ (Relative Position)
+                // ค่าปกติจะอยู่ประมาณ 0.3 (มองขวา) ถึง 0.7 (มองซ้าย)
+                let relativeX = (leftIris.x - leftInner.x) / eyeWidth;
+                let relativeY = (leftIris.y - leftEyeTop.y) * 10; // ปรับความไวแกน Y
+
+                // Calibration แบบง่ายๆ (ปรับตัวเลขพวกนี้ให้เข้ากับหน้า)
+                // ถ้าค่า relativeX > 0.6 แสดงว่ามองซ้าย, < 0.4 มองขวา
+                
+                // Map ค่าให้เต็มจอ (Sensitivity Multiplier)
+                // ต้องกลับด้าน (1 - relativeX) เพราะกล้อง Mirror
+                let screenX = (0.5 - relativeX) * 200; // *200 คือความไว (Sensitivity)
+                let screenY = (relativeY - 0.2) * -100;
+
+                // Smoothing (Lerp) ไม่ให้เป้ากระตุก
+                targetX += (screenX - targetX) * 0.1;
+                targetY += (screenY - targetY) * 0.1;
+            }
+        }
+
+        const faceMesh = new FaceMesh({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }});
+        
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true, // สำคัญมาก! ต้องเปิดเพื่อเอาค่า Iris (ตาดำ)
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        
+        faceMesh.onResults(onResults);
+
+        const videoElement = document.getElementById('input_video');
+        const cameraUtils = new Camera(videoElement, {
+            onFrame: async () => {
+                await faceMesh.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        cameraUtils.start();
+
+        // --- 4. ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const positionsArray = particles.geometry.attributes.position.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+                const iz = i * 3 + 2;
+
+                let px = positionsArray[ix];
+                let py = positionsArray[iy];
+                let pz = positionsArray[iz];
+
+                // คำนวณระยะห่างจากเป้าสายตา
+                const dx = targetX - px;
+                const dy = targetY - py;
+                const dz = 0 - pz; // ดึงกลับมาที่ระนาบ Z=0
+
+                if (isBlinking) {
+                    // === โหมด Blink: ดูดรวมกันเร็วๆ (Black Hole Effect) ===
+                    velocities[ix] += dx * 0.05;
+                    velocities[iy] += dy * 0.05;
+                    velocities[iz] += dz * 0.05;
+                } else {
+                    // === โหมดปกติ: ลอยตามสายตาแบบนุ่มนวล ===
+                    // แรงดึงดูดเบาๆ เข้าหาเป้าสายตา
+                    velocities[ix] += dx * 0.002;
+                    velocities[iy] += dy * 0.002;
+                    velocities[iz] += dz * 0.002;
+
+                    // แรงสุ่ม (Noise) ให้ดูมีชีวิต
+                    velocities[ix] += (Math.random() - 0.5) * 0.2;
+                    velocities[iy] += (Math.random() - 0.5) * 0.2;
+                    velocities[iz] += (Math.random() - 0.5) * 0.2;
+                }
+
+                // ใส่แรงหน่วง (Friction) ไม่ให้วิ่งเร็วเกิน
+                velocities[ix] *= 0.92;
+                velocities[iy] *= 0.92;
+                velocities[iz] *= 0.92;
+
+                // อัปเดตตำแหน่ง
+                positionsArray[ix] += velocities[ix];
+                positionsArray[iy] += velocities[iy];
+                positionsArray[iz] += velocities[iz];
+            }
+
+            particles.geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

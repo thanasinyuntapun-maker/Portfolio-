@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Particle Hand System</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        video { display: none; } /* ซ่อนวิดีโอต้นฉบับ */
+        #loading {
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            color: #00ffff; font-family: sans-serif; font-size: 20px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">Initializing System... (Please allow camera)</div>
+    <video id="input_video"></video>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <script>
+        // --- 1. SETUP THREE.JS SCENE ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 30;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. CREATE PARTICLES ---
+        const particleCount = 2000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = new Float32Array(particleCount * 3);
+        const originalPositions = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 40; // กระจายตัวเริ่มต้น
+            originalPositions[i] = positions[i];
+            velocities[i] = 0;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        // สร้างจุดเรืองแสง
+        const material = new THREE.PointsMaterial({
+            color: 0x00ffff, // สีฟ้า Arc Reactor
+            size: 0.3,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // --- 3. STATE VARIABLES ---
+        let handPosition = new THREE.Vector3(0, 0, 0);
+        let isHandDetected = false;
+        let isFist = false;
+
+        // --- 4. MEDIAPIPE HAND TRACKING ---
+        const videoElement = document.getElementById('input_video');
+        const loadingText = document.getElementById('loading');
+
+        function onResults(results) {
+            loadingText.style.display = 'none';
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                isHandDetected = true;
+                const landmarks = results.multiHandLandmarks[0];
+
+                // คำนวณตำแหน่งกลางฝ่ามือ (ใช้จุด 0 และ 9)
+                const wrist = landmarks[0];
+                const middleFingerMCP = landmarks[9];
+                
+                // แปลงพิกัดจาก 0-1 เป็น World Space ของ Three.js
+                // x ต้องกลับด้านเพราะกล้อง Mirror
+                const x = (0.5 - middleFingerMCP.x) * 40; 
+                const y = (0.5 - middleFingerMCP.y) * 25; // ปรับสเกลให้ตรงกับหน้าจอ
+                
+                // Lerp เพื่อความนุ่มนวล
+                handPosition.lerp(new THREE.Vector3(x, y, 0), 0.1);
+
+                // --- ตรวจสอบการกำมือ (Fist Detection) ---
+                // เช็คระยะห่างระหว่างปลายนิ้ว (12) กับข้อนิ้ว (0)
+                const tip = landmarks[12]; // ปลายนิ้วกลาง
+                const dist = Math.sqrt(Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2));
+
+                // ถ้าระยะห่างน้อยกว่าค่าที่ตั้งไว้ = กำมือ
+                if (dist < 0.15) {
+                    isFist = true;
+                    material.color.setHex(0xff0000); // เปลี่ยนเป็นสีแดงตอนกำมือ
+                } else {
+                    isFist = false;
+                    material.color.setHex(0x00ffff); // สีฟ้าตอนแบมือ
+                }
+
+            } else {
+                isHandDetected = false;
+            }
+        }
+
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+        
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+        
+        hands.onResults(onResults);
+
+        const cameraUtils = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        cameraUtils.start();
+
+        // --- 5. ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const positionsArray = particles.geometry.attributes.position.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+                const iz = i * 3 + 2;
+
+                let px = positionsArray[ix];
+                let py = positionsArray[iy];
+                let pz = positionsArray[iz];
+
+                if (isHandDetected && isFist) {
+                    // === โหมดกำมือ: พุ่งเข้าหาจุดศูนย์กลาง (Convergence) ===
+                    const dx = handPosition.x - px;
+                    const dy = handPosition.y - py;
+                    const dz = handPosition.z - pz;
+
+                    // ใส่แรงดึงดูด
+                    positionsArray[ix] += dx * 0.05;
+                    positionsArray[iy] += dy * 0.05;
+                    positionsArray[iz] += dz * 0.05;
+
+                    // เพิ่มความสั่นสะเทือนเล็กน้อย (Energy Effect)
+                    positionsArray[ix] += (Math.random() - 0.5) * 0.2;
+                    positionsArray[iy] += (Math.random() - 0.5) * 0.2;
+                    positionsArray[iz] += (Math.random() - 0.5) * 0.2;
+
+                } else if (isHandDetected && !isFist) {
+                    // === โหมดแบมือ: กระจายตัวออกและหมุนวน (Diffuse & Wander) ===
+                    // ให้พาร์ทิเคิลพยายามกลับไปตำแหน่งเดิม หรือลอยอิสระ
+                    
+                    // เพิ่มความเร็วแบบสุ่ม (Brownian Motion)
+                    positionsArray[ix] += (Math.random() - 0.5) * 0.5;
+                    positionsArray[iy] += (Math.random() - 0.5) * 0.5;
+                    positionsArray[iz] += (Math.random() - 0.5) * 0.5;
+
+                    // แรงผลักเบาๆ จากมือ (Hand Repulsion)
+                    const dist = Math.sqrt(
+                        Math.pow(px - handPosition.x, 2) + 
+                        Math.pow(py - handPosition.y, 2)
+                    );
+                    
+                    if (dist < 5) {
+                        const angle = Math.atan2(py - handPosition.y, px - handPosition.x);
+                        positionsArray[ix] += Math.cos(angle) * 0.5;
+                        positionsArray[iy] += Math.sin(angle) * 0.5;
+                    }
+
+                    // ดึงกลับเบาๆ ไม่ให้หลุดเฟรม
+                    positionsArray[ix] += (originalPositions[ix] - px) * 0.01;
+                    positionsArray[iy] += (originalPositions[iy] - py) * 0.01;
+                } else {
+                    // ไม่เห็นมือ: ลอยช้าๆ
+                    positionsArray[ix] += Math.sin(Date.now() * 0.001 + i) * 0.02;
+                    positionsArray[iy] += Math.cos(Date.now() * 0.002 + i) * 0.02;
+                }
+            }
+
+            particles.geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
