@@ -53,7 +53,7 @@ function useReveal() {
 function App() {
   const P = window.PORTFOLIO;
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [lang, setLang] = useState(() => localStorage.getItem('cosmos-lang') || 'th');
+  const [lang, setLang] = useState(() => localStorage.getItem('cosmos-lang') || 'en');
   const [filter, setFilter] = useState('all');
   const [scrolled, setScrolled] = useState(false);
   const sceneRef = useRef(null);
