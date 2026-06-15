@@ -183,6 +183,42 @@ window.PORTFOLIO = {
       role: T("Solo · ต่อโปรเจกต์", "Solo · per project"),
       outcome: T("ส่งงานตรงเวลา 6/6", "On-time delivery 6/6"),
     },
+    {
+      id: "classroom-attention",
+      idx: "09",
+      cats: ["cv"],
+      cat: T("Computer Vision · MediaPipe", "Computer Vision · MediaPipe"),
+      title: T("วัด", "Measuring"),
+      titleEm: T("ความตั้งใจนักเรียน", "student attention"),
+      year: "2026",
+      client: T("โปรเจกต์ส่วนตัว", "Personal project"),
+      desc: T(
+        "ระบบวัดความสนใจ real-time ผ่านกล้อง — ฟิวส์ 3 สัญญาณพร้อมกัน: EAR (eye aspect ratio), Head Pose (ท่าหัว), Gaze (ทิศสายตา) จาก MediaPipe 478-point face landmark ทำงานใน browser ทั้งหมด on-device ไม่มี server",
+        "Real-time attention scoring via webcam — fuses EAR (eye aspect ratio), Head Pose, and Gaze from MediaPipe's 478-point face landmark model. Fully in-browser, on-device, zero server."
+      ),
+      tags: ["MediaPipe", "Face Landmarker", "EAR", "Head Pose", "Gaze", "WebGL", "Vanilla JS"],
+      role: T("Solo · 1 สัปดาห์", "Solo · 1 week"),
+      outcome: T("3 สัญญาณ on-device real-time", "3 on-device signals, real-time"),
+      liveUrl: "classroom-attention-v3.html",
+    },
+    {
+      id: "shear-building",
+      idx: "10",
+      cats: ["sim"],
+      cat: T("Simulation · Structural Dynamics", "Simulation · Structural Dynamics"),
+      title: T("จำลอง", "Simulating"),
+      titleEm: T("อาคารสั่นสะเทือน", "buildings that shake"),
+      year: "2026",
+      client: T("โปรเจกต์ส่วนตัว / วิศวกรรมโครงสร้าง", "Personal / Structural Engineering"),
+      desc: T(
+        "Shear Building Simulator แบบ multi-DOF ครบวงจร — Jacobi eigenvalue solver, mode shapes, FRF, และ time-domain response ด้วย Newmark-β พร้อม TMD และ Viscous Damper control เขียน pure JS ไม่มี dependency ภายนอก",
+        "Multi-DOF shear building vibration simulator — Jacobi eigenvalue solver, mode shapes, FRF, Newmark-β time integration, plus TMD and viscous damper control. Pure JS, zero external dependencies."
+      ),
+      tags: ["Structural Dynamics", "Eigenvalue / Jacobi", "Newmark-β", "TMD", "FRF", "Pure JS"],
+      role: T("Solo · 2 สัปดาห์", "Solo · 2 weeks"),
+      outcome: T("TMD ลด amplitude 60%+", "TMD reduces amplitude 60%+"),
+      liveUrl: "shear-building-simulator.html",
+    },
   ],
 
   services: [

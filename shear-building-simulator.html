@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shear Building Vibration Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --panel:    #1c2333;
+    --border:   #30363d;
+    --accent:   #00c9a7;
+    --accent2:  #388bfd;
+    --warn:     #f0883e;
+    --danger:   #f85149;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .logo-icon {
+    width: 24px; height: 24px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .logo-icon span {
+    background: var(--accent); border-radius: 2px;
+  }
+  .logo-icon span:nth-child(2) { background: var(--accent2); }
+  .logo-icon span:nth-child(3) { opacity: .5; }
+  .logo-icon span:nth-child(4) { background: var(--warn); opacity: .7; }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .run-btn {
+    background: var(--accent);
+    color: #000;
+    border: none; cursor: pointer;
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    letter-spacing: .06em;
+    padding: 6px 18px; border-radius: 4px;
+    transition: all .15s;
+  }
+  .run-btn:hover { background: #00e5be; transform: translateY(-1px); }
+  .run-btn:active { transform: translateY(0); }
+
+  /* ── MAIN LAYOUT ── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 260px 1fr 300px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .panel:last-child { border-right: none; border-left: 1px solid var(--border); }
+
+  .panel-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .panel-header::before {
+    content: ''; width: 6px; height: 6px; border-radius: 1px;
+    background: var(--accent);
+  }
+  .panel-body { flex: 1; overflow-y: auto; padding: 12px; }
+  .panel-body::-webkit-scrollbar { width: 4px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── FORM CONTROLS ── */
+  .section-label {
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); padding: 10px 0 6px;
+    border-bottom: 1px solid var(--border); margin-bottom: 10px;
+  }
+  .section-label:not(:first-child) { margin-top: 14px; }
+
+  .field { margin-bottom: 8px; }
+  .field label {
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); margin-bottom: 3px; font-size: 11px;
+  }
+  .field label span { font-family: var(--mono); color: var(--accent2); font-size: 10px; }
+
+  .field input[type="number"], .field select {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono); font-size: 12px;
+    padding: 5px 8px;
+    transition: border-color .15s;
+    -moz-appearance: textfield;
+  }
+  .field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .field input:focus, .field select:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,201,167,.15);
+  }
+  .field select option { background: var(--panel); }
+
+  /* ── TOGGLE SWITCH ── */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; margin-bottom: 6px;
+    background: var(--panel); border-radius: 6px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .toggle-row:hover { border-color: var(--muted); }
+  .toggle-row.active { border-color: var(--accent); background: rgba(0,201,167,.06); }
+
+  .toggle-info { display: flex; flex-direction: column; gap: 2px; }
+  .toggle-name { font-size: 12px; font-weight: 500; }
+  .toggle-sub { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+
+  .toggle-switch {
+    width: 36px; height: 20px; border-radius: 10px;
+    background: var(--border); position: relative;
+    transition: background .2s; flex-shrink: 0;
+  }
+  .toggle-switch::after {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px;
+    transition: transform .2s;
+  }
+  .toggle-row.active .toggle-switch { background: var(--accent); }
+  .toggle-row.active .toggle-switch::after { transform: translateX(16px); }
+
+  /* sub-controls that appear when toggle is on */
+  .sub-fields {
+    background: rgba(0,201,167,.04);
+    border: 1px solid rgba(0,201,167,.2);
+    border-radius: 6px; padding: 8px 10px; margin-bottom: 6px;
+    display: none;
+  }
+  .sub-fields.visible { display: block; }
+
+  /* ── CENTER — VISUALIZATION ── */
+  .viz-area {
+    display: flex; flex-direction: column;
+    background: var(--bg); position: relative; overflow: hidden;
+  }
+
+  .viz-toolbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 16px; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .viz-tab {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 3px; cursor: pointer;
+    color: var(--muted); border: 1px solid transparent;
+    transition: all .15s;
+  }
+  .viz-tab.active { color: var(--accent); border-color: rgba(0,201,167,.4); background: rgba(0,201,167,.08); }
+
+  .viz-canvas-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+
+  canvas { display: block; }
+
+  /* mode shape legend */
+  .mode-legend {
+    position: absolute; bottom: 14px; left: 14px;
+    display: flex; gap: 14px;
+  }
+  .mode-chip {
+    display: flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+  }
+  .mode-chip-dot { width: 10px; height: 3px; border-radius: 2px; }
+
+  /* ── RIGHT PANEL — RESULTS ── */
+  .results-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 10px;
+  }
+  .stat-card .label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 3px; }
+  .stat-card .value { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--text); }
+  .stat-card .unit { font-size: 10px; color: var(--muted); }
+  .stat-card.accent .value { color: var(--accent); }
+  .stat-card.warn   .value { color: var(--warn); }
+
+  .freq-table { width: 100%; border-collapse: collapse; }
+  .freq-table th {
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); padding: 4px 6px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .freq-table td {
+    padding: 5px 6px; font-family: var(--mono); font-size: 12px;
+    border-bottom: 1px solid rgba(48,54,61,.6);
+  }
+  .freq-table tr:last-child td { border-bottom: none; }
+  .freq-table td:not(:first-child) { color: var(--accent2); }
+  .freq-table tr.highlight td { background: rgba(0,201,167,.06); }
+  .freq-table tr.highlight td:not(:first-child) { color: var(--accent); }
+
+  .response-chart-wrap {
+    margin-top: 12px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+  }
+  .response-chart-wrap .chart-title {
+    padding: 7px 10px; font-family: var(--mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: .1em; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TIME DOMAIN CHART AT BOTTOM ── */
+  .time-chart-bar {
+    height: 180px; border-top: 1px solid var(--border);
+    flex-shrink: 0; position: relative; background: var(--surface);
+  }
+  .time-chart-bar canvas { width: 100% !important; }
+  .time-chart-label {
+    position: absolute; top: 8px; left: 12px;
+    font-family: var(--mono); font-size: 9px; text-transform: uppercase;
+    letter-spacing: .12em; color: var(--muted);
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 100;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 10px;
+    font-family: var(--mono); font-size: 11px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    display: none;
+  }
+
+  /* scrollbar for panel */
+  * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+  .info-badge {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--muted); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 3px;
+    padding: 1px 5px; margin-left: 4px; cursor: help;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    Shear Building Vibration Simulator
+  </div>
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span id="status-txt">Ready</span>
+  </div>
+  <button class="run-btn" onclick="runSimulation()">▶ RUN</button>
+</header>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- ── LEFT PANEL: PARAMETERS ── -->
+  <div class="panel">
+    <div class="panel-header">Parameters</div>
+    <div class="panel-body">
+
+      <div class="section-label">Building Geometry</div>
+      <div class="field">
+        <label>Number of floors <span>n</span></label>
+        <input type="number" id="n-floors" value="10" min="2" max="30" step="1" onchange="updateFloorCount()">
+      </div>
+      <div class="field">
+        <label>Floor height <span>m</span></label>
+        <input type="number" id="floor-h" value="4" min="2" max="8" step="0.5">
+      </div>
+      <div class="field">
+        <label>Floor width <span>m</span></label>
+        <input type="number" id="floor-w" value="40" min="10" max="100" step="5">
+      </div>
+      <div class="field">
+        <label>Floor depth <span>m</span></label>
+        <input type="number" id="floor-d" value="20" min="10" max="100" step="5">
+      </div>
+
+      <div class="section-label">Structural Properties</div>
+      <div class="field">
+        <label>Mass mode <span></span></label>
+        <select id="mass-mode" onchange="toggleMassMode()">
+          <option value="auto">Auto (from geometry)</option>
+          <option value="manual">Manual per floor</option>
+        </select>
+      </div>
+      <div class="field" id="mass-auto-field">
+        <label>Slab thickness <span>m</span></label>
+        <input type="number" id="slab-t" value="0.25" min="0.1" max="0.5" step="0.05">
+      </div>
+      <div class="field" id="mass-manual-field" style="display:none">
+        <label>Mass per floor <span>×10⁶ kg</span></label>
+        <input type="number" id="mass-val" value="5.15" min="0.1" max="50" step="0.1">
+      </div>
+
+      <div class="field">
+        <label>Stiffness mode <span></span></label>
+        <select id="stiff-mode" onchange="toggleStiffMode()">
+          <option value="auto">Auto (E·I/h³)</option>
+          <option value="manual">Manual per floor</option>
+        </select>
+      </div>
+      <div id="stiff-auto-fields">
+        <div class="field">
+          <label>Young's modulus E <span>GPa</span></label>
+          <input type="number" id="E-mod" value="25" min="1" max="300" step="1">
+        </div>
+        <div class="field">
+          <label>Column b × h <span>cm</span></label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <input type="number" id="col-b" value="70" min="20" max="200" step="5">
+            <input type="number" id="col-h" value="70" min="20" max="200" step="5">
+          </div>
+        </div>
+        <div class="field">
+          <label>Columns per floor <span>count</span></label>
+          <input type="number" id="n-cols" value="12" min="4" max="40" step="2">
+        </div>
+      </div>
+      <div class="field" id="stiff-manual-field" style="display:none">
+        <label>Inter-story stiffness k <span>GN/m</span></label>
+        <input type="number" id="k-val" value="225" min="1" max="2000" step="10">
+      </div>
+
+      <div class="field">
+        <label>Damping ratio ζ <span>% (Rayleigh)</span></label>
+        <input type="number" id="damping" value="5" min="0.1" max="30" step="0.5">
+      </div>
+
+      <div class="section-label">Excitation</div>
+      <div class="field">
+        <label>Excitation type <span></span></label>
+        <select id="excite-type">
+          <option value="harmonic">Harmonic base</option>
+          <option value="resonance1">Resonance — Mode 1</option>
+          <option value="resonance2">Resonance — Mode 2</option>
+          <option value="impulse">Impact / Impulse</option>
+        </select>
+      </div>
+      <div class="field" id="freq-field">
+        <label>Forcing freq Ω <span>rad/s</span></label>
+        <input type="number" id="forcing-freq" value="1.5" min="0.1" max="30" step="0.1">
+      </div>
+      <div class="field">
+        <label>Base amplitude a₀ <span>mm</span></label>
+        <input type="number" id="amp" value="10" min="0.1" max="500" step="1">
+      </div>
+
+      <div class="section-label">Control Systems</div>
+
+      <!-- TMD TOGGLE -->
+      <div class="toggle-row" id="tmd-toggle" onclick="toggleControl('tmd')">
+        <div class="toggle-info">
+          <div class="toggle-name">Tuned Mass Damper</div>
+          <div class="toggle-sub">Den Hartog optimal</div>
+        </div>
+        <div class="toggle-switch"></div>
+      </div>
+      <div class="sub-fields" id="tmd-sub">
+        <div class="field">
+          <label>TMD floor (top=0) <span></span></label>
+          <input type="number" id="tmd-floor" value="0" min="0" step="1">
+        </div>
+        <div class="field">
+          <label>Mass ratio μ <span>%</span></label>
+          <input type="number" id="tmd-mu" value="5" min="0.5" max="20" step="0.5">
+        </div>
+        <div class="field">
+          <label>Tune to mode <span></span></label>
+          <select id="tmd-mode">
+            <option value="1">Mode 1</option>
+            <option value="2">Mode 2</option>
+            <option value="3">Mode 3</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ADDITIONAL DAMPER TOGGLE -->
+      <div class="toggle-row" id="vd-toggle" onclick="toggleControl('vd')">
+        <div class="toggle-info">
+          <div class="toggle-name">Viscous Dampers</div>
+          <div class="toggle-sub">Inter-story added</div>
+        </div>
+        <div class="toggle-switch"></div>
+      </div>
+      <div class="sub-fields" id="vd-sub">
+        <div class="field">
+          <label>Damper coeff. c_d <span>MN·s/m</span></label>
+          <input type="number" id="vd-c" value="5" min="0.1" max="100" step="0.5">
+        </div>
+        <div class="field">
+          <label>Install on floors <span>% from base</span></label>
+          <input type="number" id="vd-floors" value="50" min="10" max="100" step="10">
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">Bottom X% of floors</div>
+        </div>
+      </div>
+
+    </div><!-- /panel-body -->
+  </div><!-- /panel -->
+
+  <!-- ── CENTER: VISUALIZATION ── -->
+  <div class="viz-area">
+    <div class="viz-toolbar">
+      <div class="viz-tab active" onclick="switchViz('building',this)">Building</div>
+      <div class="viz-tab" onclick="switchViz('modes',this)">Mode Shapes</div>
+      <div class="viz-tab" onclick="switchViz('frf',this)">Freq. Response</div>
+    </div>
+    <div class="viz-canvas-wrap">
+      <canvas id="main-canvas"></canvas>
+      <div class="mode-legend" id="mode-legend" style="display:none">
+        <div class="mode-chip"><div class="mode-chip-dot" style="background:#00c9a7"></div> Mode 1</div>
+        <div class="mode-chip"><div class="mode-chip-dot" style="background:#388bfd"></div> Mode 2</div>
+        <div class="mode-chip"><div class="mode-chip-dot" style="background:#f0883e"></div> Mode 3</div>
+      </div>
+    </div>
+    <div class="time-chart-bar">
+      <div class="time-chart-label">Time-domain response — Top floor displacement</div>
+      <canvas id="time-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL: RESULTS ── -->
+  <div class="panel">
+    <div class="panel-header">Results</div>
+    <div class="panel-body">
+
+      <div class="results-grid">
+        <div class="stat-card accent">
+          <div class="label">ω₁ (Mode 1)</div>
+          <div class="value" id="r-w1">—</div>
+          <div class="unit">rad/s</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">f₁</div>
+          <div class="value" id="r-f1">—</div>
+          <div class="unit">Hz</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="label">Max disp. (top)</div>
+          <div class="value" id="r-disp">—</div>
+          <div class="unit">mm</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Reduction</div>
+          <div class="value" id="r-reduce">—</div>
+          <div class="unit">%</div>
+        </div>
+      </div>
+
+      <div class="section-label">Natural Frequencies</div>
+      <table class="freq-table">
+        <thead>
+          <tr>
+            <th>Mode</th>
+            <th>ω (rad/s)</th>
+            <th>f (Hz)</th>
+            <th>T (s)</th>
+          </tr>
+        </thead>
+        <tbody id="freq-tbody">
+          <tr><td colspan="4" style="color:var(--muted);font-size:11px">Run simulation to compute</td></tr>
+        </tbody>
+      </table>
+
+      <div class="response-chart-wrap">
+        <div class="chart-title">Frequency Response — |X_top / a₀|</div>
+        <canvas id="frf-canvas" height="160"></canvas>
+      </div>
+
+      <div class="section-label">Control Summary</div>
+      <div id="control-summary" style="font-size:11px;color:var(--muted);line-height:1.7;font-family:var(--mono)">
+        No control active
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /workspace -->
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  MATH ENGINE — pure JS, no dependencies
+// ─────────────────────────────────────────────────────────────────────────────
+
+function linspace(a, b, n) {
+  const arr = [];
+  const step = (b - a) / (n - 1);
+  for (let i = 0; i < n; i++) arr.push(a + i * step);
+  return arr;
+}
+
+// Cholesky-based generalized eigensolver for K φ = ω² M φ.
+// Reduces to standard symmetric problem L⁻¹ K L⁻ᵀ, then Jacobi (fixed sign bug).
+function jacobiSym(A_in, n) {
+  let A = A_in.map(r => [...r]);
+  let V = Array.from({length:n}, (_,i) => Array.from({length:n}, (_,j) => i===j?1:0));
+  for (let iter = 0; iter < 100*n*n; iter++) {
+    let maxOff = 0, p = 0, q = 1;
+    for (let i = 0; i < n; i++)
+      for (let j = i+1; j < n; j++)
+        if (Math.abs(A[i][j]) > maxOff) { maxOff = Math.abs(A[i][j]); p = i; q = j; }
+    if (maxOff < 1e-12) break;
+
+    const app = A[p][p], aqq = A[q][q], apq = A[p][q];
+    const phi = 0.5 * Math.atan2(2*apq, aqq - app); // robust: no sign(0) issue
+    const c = Math.cos(phi), s = Math.sin(phi);
+
+    const An = A.map(r => [...r]);
+    for (let i = 0; i < n; i++) {
+      if (i === p || i === q) continue;
+      An[i][p] = c*A[i][p] - s*A[i][q]; An[p][i] = An[i][p];
+      An[i][q] = s*A[i][p] + c*A[i][q]; An[q][i] = An[i][q];
+    }
+    An[p][p] = c*c*app - 2*s*c*apq + s*s*aqq;
+    An[q][q] = s*s*app + 2*s*c*apq + c*c*aqq;
+    An[p][q] = 0; An[q][p] = 0;
+    A = An;
+
+    const Vn = V.map(r => [...r]);
+    for (let i = 0; i < n; i++) {
+      Vn[i][p] = c*V[i][p] - s*V[i][q];
+      Vn[i][q] = s*V[i][p] + c*V[i][q];
+    }
+    V = Vn;
+  }
+  const pairs = A.map((row, i) => ({ val: row[i], vec: V.map(r => r[i]) }));
+  pairs.sort((a, b) => a.val - b.val);
+  return { values: pairs.map(p => p.val), vectors: pairs.map(p => p.vec) };
+}
+
+// Generalized eig: K φ = λ M φ. M is diagonal (lumped mass) → trivial Cholesky.
+// Standard form: Ã = M^(-1/2) K M^(-1/2), eigenvectors mapped back by M^(-1/2).
+function eigGeneralized(K, masses, n) {
+  const sqrtMi = masses.map(m => 1/Math.sqrt(m));
+  const Atil = Array.from({length:n}, (_, i) =>
+    Array.from({length:n}, (_, j) => K[i][j] * sqrtMi[i] * sqrtMi[j]));
+  const res = jacobiSym(Atil, n);
+  // Map eigenvectors back: φ = M^(-1/2) ψ
+  const vectors = res.vectors.map(psi => psi.map((v, i) => v * sqrtMi[i]));
+  return { values: res.values, vectors };
+}
+
+// Compatibility wrapper — accepts M⁻¹K but we rebuild from params instead.
+function eig(MiK, n) {
+  // MiK passed for signature compatibility; recompute properly is done in buildEigen.
+  return jacobiSym(MiK, n);
+}
+
+function buildMatrices(params) {
+  const { n, masses, stiffnesses } = params;
+  // M diagonal
+  const M = masses;
+  // K tridiagonal
+  const K = Array.from({length:n}, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    K[i][i] = stiffnesses[i] + (i < n-1 ? stiffnesses[i+1] : 0);
+    if (i > 0)   { K[i][i-1] = -stiffnesses[i]; K[i-1][i] = -stiffnesses[i]; }
+  }
+  // M^-1 * K
+  const MiK = K.map((row, i) => row.map(v => v / M[i]));
+  return { M, K, MiK };
+}
+
+function rayleighDamping(zeta, w1, w2) {
+  // alpha*M + beta*K = C; use modes 1 & 2
+  const a0 = 2*zeta*w1*w2 / (w1+w2);
+  const a1 = 2*zeta / (w1+w2);
+  return { a0, a1 };
+}
+
+// Frequency Response Function (modal superposition, steady-state)
+function computeFRF(params, eigenRes, freqRange) {
+  const { n, masses, stiffnesses, zeta } = params;
+  const { values, vectors } = eigenRes;
+  const omegas = values.map(v => Math.sqrt(Math.max(v, 0)));
+  const nModes = Math.min(n, 6);
+  const nFreqs = freqRange.length;
+  const Xtop = new Array(nFreqs).fill(0);
+
+  // Modal participation factor for base excitation: Γ_r = φ_r^T M 1 / (φ_r^T M φ_r)
+  for (let r = 0; r < nModes; r++) {
+    const phi = vectors[r];
+    let num = 0, den = 0;
+    for (let i = 0; i < n; i++) {
+      num += phi[i] * masses[i];
+      den += phi[i] * phi[i] * masses[i];
+    }
+    const gamma = num / den;
+    const wr = omegas[r];
+    const zr = zeta;
+
+    for (let fi = 0; fi < nFreqs; fi++) {
+      const W = freqRange[fi];
+      const r2 = (W/wr)**2;
+      const denom = Math.sqrt((1-r2)**2 + (2*zr*(W/wr))**2);
+      // top floor = last index
+      Xtop[fi] += (phi[n-1] * gamma / (wr*wr)) * (W*W / denom);
+    }
+  }
+  return Xtop.map(v => Math.abs(v));
+}
+
+// ── Dense linear algebra helpers (LU solve, general N×N) ──
+function luSolve(A, b) {
+  const n = b.length;
+  // Copy
+  const M = A.map(r => [...r]);
+  const x = [...b];
+  const piv = Array.from({length:n}, (_,i) => i);
+  // LU with partial pivoting
+  for (let k = 0; k < n; k++) {
+    let p = k, max = Math.abs(M[k][k]);
+    for (let i = k+1; i < n; i++) if (Math.abs(M[i][k]) > max) { max = Math.abs(M[i][k]); p = i; }
+    if (p !== k) { [M[k], M[p]] = [M[p], M[k]]; [x[k], x[p]] = [x[p], x[k]]; }
+    const pivot = M[k][k] || 1e-30;
+    for (let i = k+1; i < n; i++) {
+      const f = M[i][k] / pivot;
+      M[i][k] = f;
+      for (let j = k+1; j < n; j++) M[i][j] -= f * M[k][j];
+      x[i] -= f * x[k];
+    }
+  }
+  // Back substitution
+  for (let i = n-1; i >= 0; i--) {
+    let s = x[i];
+    for (let j = i+1; j < n; j++) s -= M[i][j] * x[j];
+    x[i] = s / (M[i][i] || 1e-30);
+  }
+  return x;
+}
+
+function matVec(A, v) {
+  return A.map(row => row.reduce((s, a, j) => s + a * v[j], 0));
+}
+
+// ── Assemble full system matrices including control devices ──
+// Returns { Mm, Km, Cm, N, nStruct } where N may exceed n if a TMD DOF is added
+function assembleSystem(params, eigenRes, ctrl) {
+  const { n, masses, stiffnesses, zeta } = params;
+  const omegas = eigenRes.values.map(v => Math.sqrt(Math.max(v, 0)));
+  const w1 = omegas[0], w2 = omegas[1] || omegas[0]*3;
+  const { a0: alp, a1: bet } = rayleighDamping(zeta, w1, w2);
+
+  // Base structural M, K (n×n)
+  const Ks = Array.from({length:n}, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    Ks[i][i] = stiffnesses[i] + (i < n-1 ? stiffnesses[i+1] : 0);
+    if (i > 0) { Ks[i][i-1] = -stiffnesses[i]; Ks[i-1][i] = -stiffnesses[i]; }
+  }
+  // Rayleigh damping C = αM + βK
+  const Cs = Array.from({length:n}, (_, i) =>
+    Array.from({length:n}, (_, j) => bet * Ks[i][j] + (i === j ? alp * masses[i] : 0)));
+
+  // Added viscous dampers (inter-story) — modifies Cs only
+  if (ctrl.vd) {
+    const c_d = ctrl.vdC * 1e6;          // MN·s/m → N·s/m
+    const nInstall = Math.ceil(n * ctrl.vdPct);
+    for (let i = 0; i < nInstall; i++) {
+      // damper between floor i and i-1 (ground for i=0)
+      Cs[i][i] += c_d;
+      if (i > 0) { Cs[i][i-1] -= c_d; Cs[i-1][i] -= c_d; Cs[i-1][i-1] += c_d; }
+    }
+  }
+
+  let N = n;
+  let Mm = masses.map((m,i) => Array.from({length:n}, (_,j) => i===j ? m : 0));
+  let Km = Ks, Cm = Cs;
+
+  // TMD as an extra DOF coupled to a chosen floor
+  if (ctrl.tmd) {
+    N = n + 1;
+    const mu = ctrl.tmdMu;                       // mass ratio
+    const tuneOmega = omegas[ctrl.tmdMode - 1];  // target modal freq
+    const totalMass = masses.reduce((a,b)=>a+b, 0);
+    const m_tmd = mu * totalMass * 0.3;          // effective TMD mass
+    const f_opt = 1 / (1 + mu);
+    const w_tmd = tuneOmega * f_opt;
+    const k_tmd = m_tmd * w_tmd * w_tmd;
+    const z_opt = Math.sqrt(3*mu / (8*(1+mu)**3));
+    const c_tmd = 2 * z_opt * m_tmd * w_tmd;
+    const attach = n - 1 - ctrl.tmdFloor;        // floor index (top=0)
+    const t = n;                                 // TMD DOF index
+
+    // Expand matrices to N×N
+    const expand = src => {
+      const out = Array.from({length:N}, () => new Array(N).fill(0));
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) out[i][j] = src[i][j];
+      return out;
+    };
+    Mm = expand(Mm); Km = expand(Km); Cm = expand(Cm);
+    Mm[t][t] = m_tmd;
+    Km[attach][attach] += k_tmd; Km[t][t] += k_tmd;
+    Km[attach][t] -= k_tmd; Km[t][attach] -= k_tmd;
+    Cm[attach][attach] += c_tmd; Cm[t][t] += c_tmd;
+    Cm[attach][t] -= c_tmd; Cm[t][attach] -= c_tmd;
+
+    params._tmdInfo = { m_tmd, w_tmd, f_opt, z_opt, attach };
+  }
+
+  return { Mm, Km, Cm, N, nStruct: n };
+}
+
+// ── Newmark-β integration on full assembled system ──
+function newmarkBeta(params, eigenRes, tMax, dt, a0_mm, forceType, forceOmega, ctrl) {
+  const sys = assembleSystem(params, eigenRes, ctrl);
+  const { Mm, Km, Cm, N, nStruct } = sys;
+  const a0 = a0_mm / 1000; // m
+
+  let x = new Array(N).fill(0);
+  let v = new Array(N).fill(0);
+  let acc = new Array(N).fill(0);
+
+  const beta = 0.25, gamma = 0.5;
+  const nt = Math.round(tMax / dt);
+
+  // Influence vector: ground accel affects structural DOFs only (not TMD relative DOF directly)
+  const influence = new Array(N).fill(0);
+  for (let i = 0; i < N; i++) influence[i] = 1.0; // all masses feel ground motion
+
+  // Effective stiffness (constant) → factor once
+  const Keff = Array.from({length:N}, (_, i) =>
+    Array.from({length:N}, (_, j) =>
+      Km[i][j] + (gamma/(beta*dt)) * Cm[i][j] + (1/(beta*dt*dt)) * Mm[i][j]));
+
+  const times = [], topDisp = [], fullStates = [];
+  const skip = Math.max(1, Math.round(nt / 500));
+
+  for (let step = 0; step < nt; step++) {
+    const t = step * dt;
+    let ag;
+    if (forceType === 'impulse') ag = step < 3 ? a0 * 60 : 0;
+    else ag = a0 * forceOmega * forceOmega * Math.sin(forceOmega * t);
+
+    const F = Mm.map((row, i) => -row.reduce((s, m, j) => s + m * influence[j], 0) * ag);
+
+    // RHS = F + M·(predictor) + C·(predictor)
+    const px = x.map((xi, i) => xi/(beta*dt*dt) + v[i]/(beta*dt) + acc[i]*(0.5/beta - 1));
+    const pv = x.map((xi, i) => xi*(gamma/(beta*dt)) + v[i]*(gamma/beta - 1) + acc[i]*dt*(gamma/(2*beta) - 1));
+    const Mpx = matVec(Mm, px);
+    const Cpv = matVec(Cm, pv);
+    const rhs = F.map((f, i) => f + Mpx[i] + Cpv[i]);
+
+    const xNew = luSolve(Keff, rhs);
+    const aNew = xNew.map((xi, i) => (xi - x[i])/(beta*dt*dt) - v[i]/(beta*dt) - acc[i]*(0.5/beta - 1));
+    const vNew = v.map((vi, i) => vi + dt*((1-gamma)*acc[i] + gamma*aNew[i]));
+
+    x = xNew; v = vNew; acc = aNew;
+
+    if (step % skip === 0) {
+      times.push(t);
+      topDisp.push(x[nStruct-1] * 1000); // mm
+      fullStates.push(x.slice(0, nStruct).map(xi => xi)); // structural DOFs only, in m
+    }
+  }
+  return { times, topDisp, fullStates };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  UI STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+let currentViz = 'building';
+let animFrame = null;
+let simResult = null;
+let animT = 0;
+const controls = { tmd: false, vd: false };
+
+function toggleControl(id) {
+  controls[id] = !controls[id];
+  const toggle = document.getElementById(id+'-toggle');
+  const sub    = document.getElementById(id+'-sub');
+  toggle.classList.toggle('active', controls[id]);
+  sub.classList.toggle('visible', controls[id]);
+}
+
+function toggleMassMode() {
+  const mode = document.getElementById('mass-mode').value;
+  document.getElementById('mass-auto-field').style.display   = mode==='auto'   ? '' : 'none';
+  document.getElementById('mass-manual-field').style.display = mode==='manual' ? '' : 'none';
+}
+function toggleStiffMode() {
+  const mode = document.getElementById('stiff-mode').value;
+  document.getElementById('stiff-auto-fields').style.display  = mode==='auto'   ? '' : 'none';
+  document.getElementById('stiff-manual-field').style.display = mode==='manual' ? '' : 'none';
+}
+function updateFloorCount() {
+  // clamp TMD floor
+  const n = +document.getElementById('n-floors').value;
+  const tf = document.getElementById('tmd-floor');
+  if (+tf.value >= n) tf.value = n-1;
+  tf.max = n-1;
+}
+
+function switchViz(name, el) {
+  currentViz = name;
+  document.querySelectorAll('.viz-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('mode-legend').style.display = name==='modes' ? 'flex' : 'none';
+  if (simResult) drawViz();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PARAMETER COLLECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function collectParams() {
+  const n      = Math.max(2, Math.min(30, +document.getElementById('n-floors').value));
+  const floorH = +document.getElementById('floor-h').value;
+  const floorW = +document.getElementById('floor-w').value;
+  const floorD = +document.getElementById('floor-d').value;
+  const zeta   = +document.getElementById('damping').value / 100;
+
+  // Mass
+  let masses;
+  if (document.getElementById('mass-mode').value === 'auto') {
+    const rho = 2400; // kg/m3 concrete
+    const t   = +document.getElementById('slab-t').value;
+    const m   = rho * floorW * floorD * t;
+    masses = new Array(n).fill(m);
+  } else {
+    const m = +document.getElementById('mass-val').value * 1e6;
+    masses = new Array(n).fill(m);
+  }
+
+  // Stiffness (inter-story)
+  let stiffnesses;
+  if (document.getElementById('stiff-mode').value === 'auto') {
+    const E    = +document.getElementById('E-mod').value * 1e9;
+    const b    = +document.getElementById('col-b').value / 100;
+    const h    = +document.getElementById('col-h').value / 100;
+    const Icol = b * h*h*h / 12;
+    const nCol = +document.getElementById('n-cols').value;
+    const k    = nCol * 12 * E * Icol / (floorH**3);
+    stiffnesses = new Array(n+1).fill(k);
+  } else {
+    const k = +document.getElementById('k-val').value * 1e9;
+    stiffnesses = new Array(n+1).fill(k);
+  }
+
+  const exciteType = document.getElementById('excite-type').value;
+  const amp        = +document.getElementById('amp').value;
+
+  return { n, masses, stiffnesses, zeta, exciteType, amp, floorH };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MAIN RUN
+// ─────────────────────────────────────────────────────────────────────────────
+
+function getCtrl() {
+  return {
+    tmd: controls.tmd,
+    tmdFloor: +document.getElementById('tmd-floor').value,
+    tmdMu: +document.getElementById('tmd-mu').value / 100,
+    tmdMode: +document.getElementById('tmd-mode').value,
+    vd: controls.vd,
+    vdC: +document.getElementById('vd-c').value,
+    vdPct: +document.getElementById('vd-floors').value / 100,
+  };
+}
+
+function runSimulation() {
+  const params = collectParams();
+  document.getElementById('status-txt').textContent = 'Computing…';
+
+  setTimeout(() => { // allow repaint
+    const n = params.n;
+    const Kstruct = Array.from({length:n}, () => new Array(n).fill(0));
+    for (let i = 0; i < n; i++) {
+      Kstruct[i][i] = params.stiffnesses[i] + (i < n-1 ? params.stiffnesses[i+1] : 0);
+      if (i > 0) { Kstruct[i][i-1] = -params.stiffnesses[i]; Kstruct[i-1][i] = -params.stiffnesses[i]; }
+    }
+    const eigenRes = eigGeneralized(Kstruct, params.masses, n);
+    const omegas   = eigenRes.values.map(v => Math.sqrt(Math.max(v,0)));
+
+    // Excitation frequency
+    let Omega;
+    const eType = params.exciteType;
+    if (eType === 'resonance1') Omega = omegas[0];
+    else if (eType === 'resonance2') Omega = omegas[1] || omegas[0]*3;
+    else if (eType === 'impulse') Omega = omegas[0];
+    else Omega = +document.getElementById('forcing-freq').value;
+
+    const ctrl = getCtrl();
+    const tMax = 20, dt = 0.006;
+
+    // Always run uncontrolled baseline for reduction comparison
+    const noCtrl = { tmd:false, vd:false };
+    const tdBase = newmarkBeta(params, eigenRes, tMax, dt, params.amp, eType, Omega, noCtrl);
+    const baseMax = Math.max(...tdBase.topDisp.map(Math.abs)) || 1e-9;
+
+    // Controlled run (same as base if no control active)
+    const hasCtrl = ctrl.tmd || ctrl.vd;
+    const tdRes = hasCtrl
+      ? newmarkBeta(params, eigenRes, tMax, dt, params.amp, eType, Omega, ctrl)
+      : tdBase;
+
+    const maxDisp = Math.max(...tdRes.topDisp.map(Math.abs));
+
+    // FRF (uncontrolled — analytical modal)
+    const freqRange = linspace(0.01, (omegas[Math.min(4,n-1)] || 30) * 2.5, 500);
+    const frfVals   = computeFRF(params, eigenRes, freqRange);
+
+    // TRUE reduction from peak comparison
+    let reduction = '—';
+    if (hasCtrl) reduction = ((1 - maxDisp/baseMax) * 100).toFixed(1);
+
+    simResult = { params, eigenRes, omegas, tdRes, tdBase, frfVals, freqRange,
+                  maxDisp, baseMax, reduction, Omega, hasCtrl };
+
+    updateResults();
+    drawViz();
+    animateBuilding();
+
+    document.getElementById('status-txt').textContent = 'Computed ✓';
+  }, 10);
+}
+
+function updateResults() {
+  const { omegas, maxDisp, reduction, params } = simResult;
+  const n = Math.min(params.n, 8);
+
+  document.getElementById('r-w1').textContent = omegas[0].toFixed(3);
+  document.getElementById('r-f1').textContent = (omegas[0]/(2*Math.PI)).toFixed(3);
+  document.getElementById('r-disp').textContent = maxDisp.toFixed(1);
+  document.getElementById('r-reduce').textContent = reduction === '—' ? '—' : reduction + '%';
+
+  // Table
+  let rows = '';
+  for (let i = 0; i < n; i++) {
+    const w = omegas[i];
+    const f = w / (2*Math.PI);
+    const T = 1 / f;
+    const hl = i < 3 ? 'highlight' : '';
+    rows += `<tr class="${hl}">
+      <td>Mode ${i+1}</td>
+      <td>${w.toFixed(3)}</td>
+      <td>${f.toFixed(3)}</td>
+      <td>${T.toFixed(3)}</td>
+    </tr>`;
+  }
+  document.getElementById('freq-tbody').innerHTML = rows;
+
+  // Control summary
+  let cs = '';
+  if (controls.tmd) {
+    const mu = +document.getElementById('tmd-mu').value;
+    const mode = +document.getElementById('tmd-mode').value;
+    const wr = omegas[mode-1];
+    const opt_f = 1/(1+mu/100);
+    const opt_z = Math.sqrt(3*mu/100 / (8*(1+mu/100)**3));
+    cs += `TMD ON\n  μ = ${mu}%\n  f_opt = ${opt_f.toFixed(4)}\n  ζ_opt = ${(opt_z*100).toFixed(2)}%\n  ω_TMD = ${(wr*opt_f).toFixed(3)} rad/s\n`;
+  }
+  if (controls.vd) {
+    const cd = +document.getElementById('vd-c').value;
+    cs += `Viscous Dampers ON\n  c_d = ${cd} MN·s/m\n`;
+  }
+  if (!cs) cs = 'No control active';
+  document.getElementById('control-summary').textContent = cs;
+
+  // Draw FRF in results panel
+  drawFRFSmall();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DRAWING
+// ─────────────────────────────────────────────────────────────────────────────
+
+function drawViz() {
+  if (!simResult) return;
+  if (currentViz === 'building') drawBuilding(0);
+  else if (currentViz === 'modes') drawModes();
+  else if (currentViz === 'frf')   drawFRFMain();
+}
+
+// ── BUILDING ANIMATION ──
+let buildingAnimT = 0;
+function animateBuilding() {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  if (currentViz !== 'building') return;
+  function frame() {
+    buildingAnimT += 0.03;
+    drawBuilding(buildingAnimT);
+    drawTimeDomain(buildingAnimT);
+    animFrame = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function drawBuilding(t) {
+  const canvas = document.getElementById('main-canvas');
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  const ctx = canvas.getContext('2d');
+  const { params, omegas, tdRes } = simResult;
+  const n = params.n;
+
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const bldW   = Math.min(W * 0.18, 120);
+  const floorH = Math.min((H * 0.8) / n, 40);
+  const totalH = floorH * n;
+  const bldX   = W / 2;
+  const bldY   = H * 0.9;
+
+  // Pull the ACTUAL displacement profile from the computed time history.
+  const states = tdRes.fullStates;
+  const nFrames = states.length;
+  const playIdx = Math.floor((t * 0.30 / 20 * nFrames) % nFrames);
+  const profile = states[playIdx] || new Array(n).fill(0);
+
+  // Scale displacements (in m) to pixels — visual exaggeration capped
+  const maxState = Math.max(...states.flat().map(Math.abs), 1e-9);
+  const pxScale  = Math.min(bldW * 0.45 / maxState, bldW * 0.45 / maxState);
+  const disp     = profile.map(d => d * pxScale);
+
+  // Ground
+  ctx.fillStyle = '#30363d';
+  ctx.fillRect(bldX - bldW*1.5, bldY, bldW*3, 6);
+
+  for (let i = 0; i < n; i++) {
+    const y    = bldY - (i+1)*floorH;
+    const dx   = disp[i];
+    const prevX = i > 0 ? disp[i-1] : 0;
+    const colorRatio = i / Math.max(1, n-1);
+    const r = Math.round(22 + colorRatio * 10);
+    const g = Math.round(55 + colorRatio * 50);
+    const b = Math.round(70 + colorRatio * 100);
+    ctx.fillStyle = `rgba(${r},${g},${b},0.9)`;
+    ctx.strokeStyle = '#00c9a7';
+    ctx.lineWidth   = 0.8;
+
+    const points = [
+      [bldX - bldW/2 + prevX, y + floorH],
+      [bldX + bldW/2 + prevX, y + floorH],
+      [bldX + bldW/2 + dx,   y],
+      [bldX - bldW/2 + dx,   y],
+    ];
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+    points.slice(1).forEach(p => ctx.lineTo(...p));
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#8b949e';
+    ctx.font = `${Math.min(10, floorH*0.5)}px JetBrains Mono`;
+    ctx.textAlign = 'right';
+    ctx.fillText(`F${n-i}`, bldX - bldW/2 + prevX - 6, y + floorH*0.65);
+
+    if (controls.tmd) {
+      const tmdFloor = +document.getElementById('tmd-floor').value;
+      const tmdIdx   = n - 1 - tmdFloor;
+      if (i === tmdIdx) {
+        ctx.fillStyle = '#f0883e';
+        ctx.beginPath();
+        ctx.arc(bldX + dx, y - 6, 6, 0, Math.PI*2);
+        ctx.fill();
+        ctx.font = '9px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText('TMD', bldX + dx, y - 14);
+      }
+    }
+
+    if (controls.vd) {
+      const pct = +document.getElementById('vd-floors').value / 100;
+      if (i < Math.ceil(n * pct)) {
+        ctx.strokeStyle = '#388bfd';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(bldX + bldW/2 + prevX + 8, y + floorH * 0.8);
+        ctx.lineTo(bldX + bldW/2 + dx + 8,    y + floorH * 0.2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(bldX + bldW/2 + dx + 8, y + floorH*0.5, 4, 0, Math.PI*2);
+        ctx.fillStyle = '#388bfd';
+        ctx.fill();
+      }
+    }
+  }
+
+  // Top displacement readout (real, in mm)
+  ctx.fillStyle = '#00c9a7';
+  ctx.font = '11px JetBrains Mono';
+  ctx.textAlign = 'left';
+  const topMm = (profile[n-1] * 1000);
+  ctx.fillText(`${topMm >= 0 ? '+' : ''}${topMm.toFixed(1)} mm`,
+    bldX + bldW/2 + disp[n-1] + 12, bldY - totalH + 10);
+
+  // Excitation arrow
+  const arrowX = bldX - bldW * 2;
+  const arrowY = bldY - floorH * 0.5;
+  const aLen = 30 * Math.sin(simResult.Omega * t * 0.5);
+  ctx.strokeStyle = '#f85149';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(arrowX, arrowY);
+  ctx.lineTo(arrowX + aLen, arrowY);
+  ctx.stroke();
+  ctx.fillStyle = '#f85149';
+  ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('ag(t)', arrowX, arrowY + 14);
+}
+
+// ── MODE SHAPES ──
+function drawModes() {
+  const canvas = document.getElementById('main-canvas');
+  const wrap   = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  const ctx    = canvas.getContext('2d');
+  const { params, eigenRes } = simResult;
+  const n      = params.n;
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const colors = ['#00c9a7','#388bfd','#f0883e'];
+  const nModes = Math.min(3, n);
+  const panelW = W / nModes;
+
+  for (let m = 0; m < nModes; m++) {
+    const phi    = eigenRes.vectors[m];
+    const pxL    = m * panelW + panelW * 0.1;
+    const pxR    = (m+1) * panelW - panelW * 0.1;
+    const pxMid  = (pxL + pxR) / 2;
+    const maxPhi = Math.max(...phi.map(Math.abs));
+    const scale  = (panelW * 0.35) / (maxPhi || 1);
+    const floorH = (H * 0.78) / n;
+    const baseY  = H * 0.9;
+
+    // Title
+    ctx.fillStyle = colors[m];
+    ctx.font      = 'bold 12px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Mode ${m+1}`, pxMid, 28);
+    const w = simResult.omegas[m];
+    ctx.fillStyle = '#8b949e';
+    ctx.font      = '10px JetBrains Mono';
+    ctx.fillText(`ω = ${w.toFixed(2)} rad/s`, pxMid, 44);
+    ctx.fillText(`f = ${(w/2/Math.PI).toFixed(3)} Hz`, pxMid, 58);
+
+    // Baseline
+    ctx.strokeStyle = '#30363d';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(pxMid, baseY + 4); ctx.lineTo(pxMid, 68); ctx.stroke();
+
+    // Mode shape
+    ctx.beginPath();
+    ctx.moveTo(pxMid, baseY);
+    for (let i = 0; i < n; i++) {
+      const y  = baseY - (i+1)*floorH;
+      const x  = pxMid + phi[i] * scale;
+      ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = colors[m];
+    ctx.lineWidth   = 2.5;
+    ctx.stroke();
+
+    // Dots per floor
+    for (let i = 0; i < n; i++) {
+      const y = baseY - (i+1)*floorH;
+      const x = pxMid + phi[i]*scale;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI*2);
+      ctx.fillStyle = colors[m];
+      ctx.fill();
+    }
+
+    // Ground block
+    ctx.fillStyle = '#30363d';
+    ctx.fillRect(pxL + 10, baseY, pxR - pxL - 20, 8);
+  }
+}
+
+// ── FRF MAIN ──
+function drawFRFMain() {
+  const canvas = document.getElementById('main-canvas');
+  const wrap   = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  const ctx    = canvas.getContext('2d');
+  const { frfVals, freqRange, omegas } = simResult;
+  const W = canvas.width, H = canvas.height;
+
+  drawFRFOnCtx(ctx, W, H, freqRange, frfVals, omegas, true);
+}
+
+function drawFRFSmall() {
+  if (!simResult) return;
+  const canvas = document.getElementById('frf-canvas');
+  canvas.width  = canvas.parentElement.clientWidth;
+  const ctx    = canvas.getContext('2d');
+  const { frfVals, freqRange, omegas } = simResult;
+  drawFRFOnCtx(ctx, canvas.width, canvas.height, freqRange, frfVals, omegas, false);
+}
+
+function drawFRFOnCtx(ctx, W, H, freqs, vals, omegas, labels) {
+  ctx.clearRect(0, 0, W, H);
+  const pad = labels ? {t:40, r:30, b:50, l:60} : {t:10, r:10, b:20, l:40};
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+
+  const maxV   = Math.max(...vals) * 1.05 || 1;
+  const maxF   = freqs[freqs.length-1];
+  const toX    = f => pad.l + (f/maxF)*plotW;
+  const toY    = v => pad.t + plotH - Math.min(v/maxV, 1) * plotH;
+
+  // Grid
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (i/4)*plotH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+plotW, y); ctx.stroke();
+    if (labels) {
+      ctx.fillStyle = '#8b949e'; ctx.font = '9px JetBrains Mono'; ctx.textAlign = 'right';
+      ctx.fillText(((1-i/4)*maxV).toFixed(2), pad.l-4, y+3);
+    }
+  }
+
+  // Natural freq lines
+  const colors = ['#00c9a7','#388bfd','#f0883e'];
+  omegas.slice(0,3).forEach((w,i) => {
+    if (w > maxF) return;
+    const x = toX(w);
+    ctx.strokeStyle = colors[i]; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t+plotH); ctx.stroke();
+    ctx.setLineDash([]);
+    if (labels) {
+      ctx.fillStyle = colors[i]; ctx.font = '9px JetBrains Mono'; ctx.textAlign = 'center';
+      ctx.fillText(`ω${i+1}`, x, pad.t - 6);
+    }
+  });
+
+  // FRF curve
+  ctx.beginPath();
+  freqs.forEach((f, i) => {
+    const x = toX(f), y = toY(vals[i]);
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = '#e6edf3'; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+  ctx.stroke();
+
+  // Axes
+  if (labels) {
+    ctx.fillStyle = '#8b949e'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+    ctx.fillText('Frequency Ω (rad/s)', pad.l + plotW/2, H - 8);
+    ctx.save(); ctx.translate(12, pad.t + plotH/2); ctx.rotate(-Math.PI/2);
+    ctx.fillText('|X_top / a₀|', 0, 0); ctx.restore();
+    ctx.font = 'bold 13px JetBrains Mono'; ctx.fillStyle = '#e6edf3'; ctx.textAlign = 'center';
+    ctx.fillText('Frequency Response Function', pad.l + plotW/2, 20);
+  }
+}
+
+// ── TIME DOMAIN ──
+function drawTimeDomain(t) {
+  const canvas = document.getElementById('time-canvas');
+  const bar    = canvas.parentElement;
+  canvas.width  = bar.clientWidth;
+  canvas.height = bar.clientHeight;
+  const ctx    = canvas.getContext('2d');
+  const { tdRes, tdBase, hasCtrl } = simResult;
+  const W = canvas.width, H = canvas.height;
+
+  const pad  = {t:24, r:12, b:22, l:48};
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const times  = tdRes.times;
+  const disp   = tdRes.topDisp;
+  const tMax   = times[times.length-1];
+  // Scale to whichever is larger so both fit
+  const maxAbs = Math.max(
+    ...disp.map(Math.abs),
+    ...(hasCtrl ? tdBase.topDisp.map(Math.abs) : [0]),
+    0.001
+  );
+  const toX = tt => pad.l + (tt/tMax)*plotW;
+  const toY = v  => pad.t + plotH/2 - (v/maxAbs)*(plotH*0.45);
+
+  // Zero line
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t+plotH/2); ctx.lineTo(pad.l+plotW, pad.t+plotH/2); ctx.stroke();
+
+  // Baseline (uncontrolled) ghost curve
+  if (hasCtrl) {
+    ctx.beginPath();
+    tdBase.times.forEach((ti, i) => {
+      const x = toX(ti), y = toY(tdBase.topDisp[i]);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle = 'rgba(139,148,158,0.45)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // Controlled / main curve
+  ctx.beginPath();
+  times.forEach((ti, i) => { i===0?ctx.moveTo(toX(ti),toY(disp[i])):ctx.lineTo(toX(ti),toY(disp[i])); });
+  ctx.strokeStyle = '#00c9a7'; ctx.lineWidth = 1.3; ctx.stroke();
+
+  // Playhead synced with animation
+  const playT = (t * 0.30) % tMax;
+  const px    = toX(playT);
+  ctx.strokeStyle = '#f85149'; ctx.lineWidth = 1; ctx.setLineDash([2,2]);
+  ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t+plotH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.fillStyle = '#8b949e'; ctx.font = '9px JetBrains Mono'; ctx.textAlign = 'center';
+  ctx.fillText('t (s)', pad.l + plotW/2, H - 4);
+  ctx.textAlign = 'right';
+  ctx.fillText(`+${maxAbs.toFixed(1)}mm`, pad.l-3, pad.t+8);
+  ctx.fillText(`−${maxAbs.toFixed(1)}mm`, pad.l-3, pad.t+plotH-2);
+
+  // Legend when comparing
+  if (hasCtrl) {
+    ctx.textAlign = 'left'; ctx.font = '9px JetBrains Mono';
+    ctx.fillStyle = 'rgba(139,148,158,0.8)';
+    ctx.fillText('— uncontrolled', pad.l + plotW - 130, pad.t + 6);
+    ctx.fillStyle = '#00c9a7';
+    ctx.fillText('— controlled', pad.l + plotW - 130, pad.t + 18);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  EXCITE TYPE — show/hide freq field
+// ─────────────────────────────────────────────────────────────────────────────
+document.getElementById('excite-type').addEventListener('change', function() {
+  document.getElementById('freq-field').style.display =
+    this.value === 'harmonic' ? '' : 'none';
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.addEventListener('resize', () => { if(simResult) drawViz(); });
+
+// Run on load with defaults
+window.addEventListener('load', () => {
+  setTimeout(runSimulation, 200);
+});
+</script>
+</body>
+</html>

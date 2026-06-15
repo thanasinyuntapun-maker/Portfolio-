@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบวัดความสนใจ v3 — MediaPipe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#F4F3EF;--surface:#FFF;--ink:#1A1A2E;--soft:#6B6B80;
+  --border:#E2E0D8;--focused:#2563EB;--drowsy:#D97706;--away:#DC2626;
+  --r:14px;--accent:#2563EB;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:#0F172A;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;z-index:200;transition:opacity .6s;}
+#splash.out{opacity:0;pointer-events:none;}
+.sp-icon{width:72px;height:72px;background:var(--accent);border-radius:20px;
+  display:flex;align-items:center;justify-content:center;font-size:32px;}
+.sp-title{font-size:22px;font-weight:700;color:#fff;text-align:center;line-height:1.4;}
+.sp-sub{font-size:13px;color:rgba(255,255,255,.4);text-align:center;max-width:260px;}
+#lb{width:240px;height:5px;background:rgba(255,255,255,.12);border-radius:10px;overflow:hidden;}
+#lf{height:100%;width:0%;background:var(--accent);border-radius:10px;transition:width .35s;}
+#lm{font-size:11px;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono',monospace;}
+
+/* HEADER */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 18px;
+  display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap;}
+.hdr-logo{width:34px;height:34px;background:var(--accent);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.hdr-t{font-size:15px;font-weight:700;}
+.hdr-s{font-size:10px;color:var(--soft);}
+.hdr-r{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
+select.sel{padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);
+  font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;background:var(--bg);color:var(--ink);}
+.pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;
+  font-size:11px;font-weight:600;background:#F0F0F0;color:var(--soft);transition:.3s;}
+.tog-wrap{display:flex;align-items:center;gap:6px;padding:5px 11px;
+  background:var(--bg);border-radius:100px;border:1.5px solid var(--border);}
+.tog-l{font-size:12px;font-weight:600;white-space:nowrap;}
+.tog{position:relative;width:34px;height:19px;cursor:pointer;}
+.tog input{opacity:0;width:0;height:0;position:absolute;}
+.tog-s{position:absolute;inset:0;background:#ccc;border-radius:20px;transition:.3s;}
+.tog-s:before{content:'';position:absolute;width:13px;height:13px;
+  left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.tog input:checked~.tog-s{background:var(--accent);}
+.tog input:checked~.tog-s:before{transform:translateX(15px);}
+.pill.on{background:#EEF2FF;color:var(--accent);}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+.pill.on .dot{animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.btn{padding:8px 14px;border-radius:9px;border:none;cursor:pointer;
+  font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;transition:.2s;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-p{background:var(--accent);color:#fff;}
+.btn-p:hover:not(:disabled){opacity:.85;}
+.btn-o{background:transparent;border:1.5px solid var(--border);color:var(--soft);}
+.btn-o:hover{border-color:var(--soft);color:var(--ink);}
+.btn-stop{background:transparent;border:1.5px solid var(--away);color:var(--away);}
+.btn-stop:hover{background:#FEF2F2;}
+
+/* TABS */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;padding:0 18px;overflow-x:auto;}
+.tab{padding:11px 16px;font-size:13px;font-weight:600;color:var(--soft);
+  border-bottom:2.5px solid transparent;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.tab.on{color:var(--accent);border-color:var(--accent);}
+.panel{display:none;padding:18px;}
+.panel.on{display:block;}
+
+/* LIVE GRID */
+.lg{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+@media(max-width:820px){.lg{grid-template-columns:1fr;}}
+
+/* CAM */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;}
+.card-hdr{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);}
+.card-t{font-size:11px;font-weight:700;color:var(--soft);letter-spacing:.06em;text-transform:uppercase;}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--soft);}
+.cam-w{position:relative;background:#060B18;min-height:260px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;}
+#video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block;}
+#ov{position:absolute;inset:0;pointer-events:none;}
+.ph{position:absolute;display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:rgba(255,255,255,.25);font-size:13px;text-align:center;padding:20px;}
+.ph span{font-size:36px;}
+.cam-ctrl{padding:11px 16px;display:flex;gap:7px;border-top:1px solid var(--border);}
+
+/* SIGNAL BADGES on video */
+.vid-badges{position:absolute;bottom:10px;left:10px;display:flex;flex-direction:column;gap:5px;}
+.vbadge{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);border-radius:8px;padding:4px 10px;font-size:11px;color:#fff;}
+.vbadge-dot{width:7px;height:7px;border-radius:50%;}
+.face-badge{position:absolute;top:9px;right:9px;background:rgba(0,0,0,.6);
+  backdrop-filter:blur(6px);color:#fff;padding:3px 10px;border-radius:100px;
+  font-size:11px;font-family:'IBM Plex Mono',monospace;display:none;}
+
+/* SCORE CARD */
+.sc{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:18px;}
+.sc-lbl{font-size:10px;font-weight:700;color:var(--soft);letter-spacing:.08em;text-transform:uppercase;}
+.sc-val{font-size:54px;font-weight:700;line-height:1;margin:6px 0 2px;
+  font-family:'IBM Plex Mono',monospace;transition:color .6s;}
+.sc-st{font-size:13px;font-weight:700;}
+.sc-hint{font-size:11px;color:var(--soft);margin-top:3px;}
+.sc-bar-w{margin-top:12px;height:6px;background:var(--border);border-radius:10px;overflow:hidden;}
+.sc-bar{height:100%;border-radius:10px;width:0%;transition:width 1.2s,background 1.2s;}
+
+/* SIGNAL BREAKDOWN */
+.sig-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:480px){.sig-grid{grid-template-columns:1fr;}}
+.sig-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;}
+.sig-icon{font-size:20px;margin-bottom:6px;}
+.sig-name{font-size:10px;font-weight:700;color:var(--soft);letter-spacing:.06em;text-transform:uppercase;}
+.sig-val{font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1;margin:4px 0 2px;}
+.sig-label{font-size:11px;font-weight:600;}
+.sig-bar-w{margin-top:8px;height:5px;background:var(--border);border-radius:10px;overflow:hidden;}
+.sig-bar{height:100%;border-radius:10px;width:0%;transition:width .8s,background .8s;}
+
+/* BREAKDOWN (focused/drowsy/away) */
+.bk-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;}
+.bk-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.bk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.bk-name{font-size:12px;font-weight:600;flex:1;}
+.bk-bar-w{flex:2;height:5px;background:var(--border);border-radius:10px;overflow:hidden;}
+.bk-bar{height:100%;border-radius:10px;width:0%;transition:width .8s;}
+.bk-pct{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;min-width:30px;text-align:right;}
+
+/* TIMELINE */
+.tl-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;}
+#tlc{width:100%;height:70px;display:block;}
+
+/* STATS */
+.st-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);
+  padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.st-n{font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1;}
+.st-l{font-size:10px;color:var(--soft);margin-top:2px;}
+
+/* HISTORY */
+.h-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);
+  padding:13px 16px;margin-bottom:10px;}
+.h-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.h-room{font-size:13px;font-weight:700;}
+.h-time{font-size:10px;color:var(--soft);font-family:'IBM Plex Mono',monospace;}
+.h-sc{font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace;}
+.h-sigs{display:flex;gap:12px;font-size:11px;color:var(--soft);margin-bottom:8px;}
+.h-bars{display:flex;gap:3px;height:5px;border-radius:10px;overflow:hidden;}
+.h-seg{height:100%;}
+
+/* MISC */
+.notice{display:flex;align-items:flex-start;gap:7px;padding:10px 13px;
+  background:#EEF2FF;border-radius:10px;font-size:11px;color:var(--accent);line-height:1.5;}
+.btn-exp{width:100%;padding:9px;border-radius:9px;border:1.5px solid var(--border);
+  background:transparent;color:var(--ink);font-family:'Sarabun',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-exp:hover{border-color:var(--accent);color:var(--accent);}
+.col{display:flex;flex-direction:column;gap:12px;}
+.sec-l{font-size:10px;font-weight:700;color:var(--soft);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px;}
+.empty{text-align:center;padding:36px;color:var(--soft);}
+.empty-ic{font-size:38px;margin-bottom:8px;}
+.ig label{font-size:10px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.rg{grid-template-columns:1fr;}}
+.rg-cam{background:#060B18;border-radius:11px;overflow:hidden;aspect-ratio:4/3;
+  position:relative;display:flex;align-items:center;justify-content:center;}
+#regVideo{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+.rg-col{display:flex;flex-direction:column;gap:11px;}
+.sm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+.sm-item{background:var(--surface);border-radius:11px;border:1px solid var(--border);
+  padding:12px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;}
+.sm-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border);}
+.sm-ph{width:56px;height:56px;border-radius:50%;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;font-size:24px;}
+.sm-name{font-size:12px;font-weight:700;}
+.sm-room{font-size:10px;color:var(--soft);}
+.btn-del{background:none;border:none;cursor:pointer;color:var(--away);font-size:11px;padding:2px 7px;border-radius:6px;}
+.btn-del:hover{background:#FEF2F2;}
+.sl-row{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid var(--border);}
+.sl-row:last-child{border-bottom:none;}
+.sl-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border);}
+.sl-av-ph{width:32px;height:32px;border-radius:50%;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.sl-name{font-size:12px;font-weight:600;flex:1;}
+.sl-st{font-size:11px;padding:2px 8px;border-radius:100px;font-weight:600;}
+.s-foc{background:#EEF2FF;color:var(--focused);}
+.s-dro{background:#FEF3DC;color:var(--drowsy);}
+.s-away{background:#FEE2E2;color:var(--away);}
+.s-un{background:var(--bg);color:var(--soft);}
+
+.ig label{font-size:10px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;}
+.inp{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);
+  font-family:'Sarabun',sans-serif;font-size:13px;color:var(--ink);background:var(--bg);width:100%;}
+.inp:focus{outline:none;border-color:var(--accent);}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border-radius:18px;padding:22px;width:100%;max-width:360px;}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:14px;}
+.mx{float:right;background:none;border:none;font-size:18px;cursor:pointer;color:var(--soft);}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#1A1A2E;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;
+  font-weight:600;transition:transform .3s;pointer-events:none;z-index:300;}
+#toast.on{transform:translateX(-50%) translateY(0);}
+
+/* calibration overlay */
+.calib-overlay{position:absolute;inset:0;background:rgba(6,11,24,.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;color:#fff;text-align:center;padding:20px;z-index:5;}
+.calib-ring{width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,255,255,.2);
+  border-top-color:var(--accent);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-icon">👁️</div>
+  <div class="sp-title">ระบบวัดความสนใจ<br>ด้วย Attention Signals</div>
+  <div class="sp-sub">EAR · Head Pose · Gaze<br>กำลังโหลด MediaPipe...</div>
+  <div id="lb"><div id="lf"></div></div>
+  <div id="lm">เริ่มต้น...</div>
+</div>
+
+<!-- MODAL: ADD ROOM -->
+<div class="modal-bg" id="mRoom">
+  <div class="modal">
+    <button class="mx" onclick="cm('mRoom')">✕</button>
+    <h3>➕ เพิ่มห้องเรียน</h3>
+    <div class="ig" style="margin-bottom:12px;">
+      <label>ชื่อห้อง เช่น 4/4, ม.6/12</label>
+      <input class="inp" id="newRoom" placeholder="พิมพ์ชื่อห้อง..." maxlength="20"
+        onkeydown="if(event.key==='Enter')addRoom()">
+    </div>
+    <button class="btn btn-p" onclick="addRoom()" style="width:100%">เพิ่ม</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+  <div class="hdr">
+    <div class="hdr-logo">👁️</div>
+    <div>
+      <div class="hdr-t">ระบบวัดความสนใจในชั้นเรียน</div>
+      <div class="hdr-s">MediaPipe · EAR · Head Pose · Gaze · On-device</div>
+    </div>
+    <div class="hdr-r">
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span style="font-size:11px;color:var(--soft);">ห้อง:</span>
+        <select class="sel" id="roomSel" onchange="onRoomChange()"></select>
+        <button class="btn btn-o" onclick="om('mRoom')" style="padding:5px 9px;font-size:12px;">+</button>
+      </div>
+      <div class="tog-wrap">
+        <span class="tog-l">จดจำใบหน้า</span>
+        <label class="tog">
+          <input type="checkbox" id="recTog" onchange="onRecToggle()">
+          <span class="tog-s"></span>
+        </label>
+      </div>
+      <div class="pill" id="pill"><div class="dot"></div><span id="pillTxt">รอเริ่ม</span></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="swTab('live')">📹 Live</div>
+    <div class="tab" id="tabRegister" onclick="swTab('register')" style="display:none;">👤 ลงทะเบียน</div>
+    <div class="tab" id="tabStudents" onclick="swTab('students')" style="display:none;">📋 รายชื่อ</div>
+    <div class="tab" onclick="swTab('signals')">📡 สัญญาณ</div>
+    <div class="tab" onclick="swTab('history')">📊 ประวัติ</div>
+  </div>
+
+  <!-- LIVE TAB -->
+  <div class="panel on" id="p-live">
+    <div class="lg">
+
+      <!-- CAM CARD -->
+      <div class="card">
+        <div class="card-hdr">
+          <span class="card-t">📷 กล้องห้องเรียน</span>
+          <span class="mono" id="fpsD">— FPS</span>
+        </div>
+        <div class="cam-w" id="camW">
+          <video id="video" autoplay muted playsinline></video>
+          <canvas id="ov"></canvas>
+          <div class="face-badge" id="fBadge">0 ใบหน้า</div>
+          <!-- live signal badges -->
+          <div class="vid-badges" id="vidBadges" style="display:none;">
+            <div class="vbadge"><div class="vbadge-dot" id="bdEAR"></div><span id="bdEARTxt">EAR —</span></div>
+            <div class="vbadge"><div class="vbadge-dot" id="bdHP"></div><span id="bdHPTxt">Pose —</span></div>
+            <div class="vbadge"><div class="vbadge-dot" id="bdGaze"></div><span id="bdGazeTxt">Gaze —</span></div>
+          </div>
+          <div class="ph" id="ph"><span>📷</span>กดปุ่มด้านล่างเพื่อเริ่ม</div>
+          <!-- calibration -->
+          <div class="calib-overlay" id="calibOv" style="display:none;">
+            <div class="calib-ring"></div>
+            <div style="font-size:15px;font-weight:700;">กำลัง Calibrate...</div>
+            <div style="font-size:12px;opacity:.6;" id="calibMsg">มองตรงกล้อง ประมาณ 3 วินาที</div>
+            <div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace;" id="calibCnt">3</div>
+          </div>
+        </div>
+        <div class="cam-ctrl">
+          <button class="btn btn-p" id="btnS" onclick="startCam()" style="flex:1;">▶ เริ่มวิเคราะห์</button>
+          <button class="btn btn-stop" id="btnX" onclick="stopCam()" style="flex:1;display:none;">■ หยุด</button>
+          <button class="btn btn-o" onclick="resetStats()">↺</button>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="col">
+
+        <!-- SCORE -->
+        <div class="sc">
+          <div class="sc-lbl">คะแนนความสนใจ — ห้อง <span id="scRoom">—</span></div>
+          <div class="sc-val" id="scV" style="color:var(--soft)">—</div>
+          <div class="sc-st" id="scSt">ยังไม่ได้เริ่ม</div>
+          <div class="sc-hint" id="scHint">กดเริ่มวิเคราะห์เพื่อดูผล</div>
+          <div class="sc-bar-w"><div class="sc-bar" id="scBar"></div></div>
+        </div>
+
+        <!-- 3 SIGNALS -->
+        <div class="sig-grid">
+          <div class="sig-card">
+            <div class="sig-icon">👁️</div>
+            <div class="sig-name">ตาเปิด (EAR)</div>
+            <div class="sig-val" id="sigEAR" style="color:var(--soft)">—</div>
+            <div class="sig-label" id="sigEARLbl" style="color:var(--soft)">—</div>
+            <div class="sig-bar-w"><div class="sig-bar" id="sigEARBar"></div></div>
+          </div>
+          <div class="sig-card">
+            <div class="sig-icon">🙂</div>
+            <div class="sig-name">ท่าทางหัว</div>
+            <div class="sig-val" id="sigHP" style="color:var(--soft)">—</div>
+            <div class="sig-label" id="sigHPLbl" style="color:var(--soft)">—</div>
+            <div class="sig-bar-w"><div class="sig-bar" id="sigHPBar"></div></div>
+          </div>
+          <div class="sig-card">
+            <div class="sig-icon">👀</div>
+            <div class="sig-name">ทิศทางสายตา</div>
+            <div class="sig-val" id="sigGaze" style="color:var(--soft)">—</div>
+            <div class="sig-label" id="sigGazeLbl" style="color:var(--soft)">—</div>
+            <div class="sig-bar-w"><div class="sig-bar" id="sigGazeBar"></div></div>
+          </div>
+        </div>
+
+        <!-- BREAKDOWN -->
+        <div class="bk-card">
+          <div class="card-t" style="margin-bottom:10px;">สัดส่วนระดับความสนใจ</div>
+          <div class="bk-row">
+            <div class="bk-dot" style="background:var(--focused)"></div>
+            <div class="bk-name">🔵 โฟกัส</div>
+            <div class="bk-bar-w"><div class="bk-bar" id="bFoc" style="background:var(--focused)"></div></div>
+            <div class="bk-pct" id="pFoc" style="color:var(--focused)">0%</div>
+          </div>
+          <div class="bk-row">
+            <div class="bk-dot" style="background:var(--drowsy)"></div>
+            <div class="bk-name">🟠 ง่วง/วอกแวก</div>
+            <div class="bk-bar-w"><div class="bk-bar" id="bDro" style="background:var(--drowsy)"></div></div>
+            <div class="bk-pct" id="pDro" style="color:var(--drowsy)">0%</div>
+          </div>
+          <div class="bk-row">
+            <div class="bk-dot" style="background:var(--away)"></div>
+            <div class="bk-name">🔴 ไม่สนใจ</div>
+            <div class="bk-bar-w"><div class="bk-bar" id="bAway" style="background:var(--away)"></div></div>
+            <div class="bk-pct" id="pAway" style="color:var(--away)">0%</div>
+          </div>
+        </div>
+
+        <!-- STUDENT LIST (recognition mode) -->
+        <div class="card" id="slCard" style="display:none;">
+          <div class="card-hdr">
+            <span class="card-t">👥 สถานะรายบุคคล</span>
+            <span class="mono" id="presCount">0 คน</span>
+          </div>
+          <div id="slBody" style="max-height:190px;overflow-y:auto;"></div>
+        </div>
+
+        <!-- TIMELINE -->
+        <div class="tl-card">
+          <div class="card-t" style="margin-bottom:8px;">แนวโน้ม (5 นาที)</div>
+          <canvas id="tlc"></canvas>
+        </div>
+
+        <!-- STATS -->
+        <div class="st-card">
+          <div><div class="st-n" id="stF">0</div><div class="st-l">ใบหน้าที่ตรวจพบ</div></div>
+          <div><div class="st-n" id="stD">0:00</div><div class="st-l">เวลาวิเคราะห์</div></div>
+          <div><div class="st-n" id="stS">0</div><div class="st-l">ตัวอย่างทั้งหมด</div></div>
+          <div><div class="st-n" id="stP">—</div><div class="st-l">ช่วงสนใจมากสุด</div></div>
+        </div>
+
+        <div class="notice">
+          <span>🔒</span>
+          <span>วิเคราะห์ 3 สัญญาณจริง: EAR (ตาหรี่/หลับ), Head Pose (หันหน้า), Gaze (ทิศสายตา) — แม่นกว่า emotion classification ข้อมูลอยู่ในเครื่องทั้งหมด</span>
+        </div>
+        <button class="btn-exp" onclick="exportCSV()">📊 ส่งออกรายงาน (.csv)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER TAB -->
+  <div class="panel" id="p-register">
+    <div style="max-width:680px;margin:0 auto;">
+      <div class="sec-l">ลงทะเบียนนักเรียนใหม่</div>
+      <div class="rg">
+        <div>
+          <div class="rg-cam">
+            <video id="regVideo" autoplay muted playsinline></video>
+            <div class="ph" id="rgPh"><span>📷</span>กดเปิดกล้องด้านล่าง</div>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:9px;">
+            <button class="btn btn-p" id="btnRC" onclick="startRegCam()" style="flex:1;">เปิดกล้อง</button>
+            <button class="btn btn-o" id="btnCap" onclick="captureStudent()" style="flex:1;" disabled>📸 ถ่ายรูป</button>
+          </div>
+        </div>
+        <div class="rg-col">
+          <div style="display:flex;gap:9px;align-items:flex-end;">
+            <img id="capPrev" style="width:72px;height:72px;border-radius:9px;object-fit:cover;border:2px solid var(--border);display:none;" alt="">
+            <div style="flex:1;">
+              <div class="ig"><label>ชื่อ-นามสกุล</label>
+                <input class="inp" id="rgName" placeholder="เช่น สมชาย ใจดี" maxlength="40"></div>
+            </div>
+          </div>
+          <div class="ig"><label>ห้องเรียน</label><select class="inp" id="rgRoom"></select></div>
+          <div class="ig"><label>หมายเหตุ</label><input class="inp" id="rgNote" placeholder="ไม่บังคับ..."></div>
+          <button class="btn btn-p" id="btnSave" onclick="saveStudent()" disabled>💾 บันทึกนักเรียน</button>
+          <div id="rgSt" style="font-size:11px;color:var(--soft);min-height:16px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENTS TAB -->
+  <div class="panel" id="p-students">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div class="sec-l" style="margin-bottom:0;">นักเรียนที่ลงทะเบียนแล้ว</div>
+      <div style="display:flex;gap:7px;">
+        <select class="sel" id="filterR" onchange="renderStudents()"></select>
+        <button class="btn btn-o" onclick="if(confirm('ลบทั้งหมด?'))clearStudents()">🗑 ล้างทั้งหมด</button>
+      </div>
+    </div>
+    <div class="sm-grid" id="smGrid"></div>
+    <div class="empty" id="smEmpty" style="display:none;">
+      <div class="empty-ic">👤</div>
+      <div style="font-weight:600;">ยังไม่มีนักเรียน</div>
+      <div style="font-size:12px;margin-top:4px;">ไปที่แท็บ "ลงทะเบียน" เพื่อเพิ่ม</div>
+    </div>
+  </div>
+
+  <!-- SIGNALS EXPLAIN TAB -->
+  <div class="panel" id="p-signals">
+    <div style="max-width:600px;margin:0 auto;">
+      <div class="sec-l">วิธีคำนวณ Attention Score</div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hdr"><span class="card-t">👁️ EAR — Eye Aspect Ratio</span><span class="mono">น้ำหนัก 40%</span></div>
+        <div style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--soft);">
+          วัดอัตราส่วนความสูงต่อความกว้างของตา<br>
+          <code style="background:var(--bg);padding:3px 7px;border-radius:5px;font-size:12px;">EAR = (|p2-p6| + |p3-p5|) / (2 × |p1-p4|)</code><br><br>
+          🔵 <strong>EAR &gt; 0.25</strong> = ตาเปิดปกติ → โฟกัส<br>
+          🟠 <strong>EAR 0.18–0.25</strong> = ตาหรี่/ง่วง<br>
+          🔴 <strong>EAR &lt; 0.18</strong> = หลับตา/ก้มหน้า<br><br>
+          <em>Threshold ถูก calibrate ตอนเริ่มต้นตาม baseline ของแต่ละคน</em>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hdr"><span class="card-t">🙂 Head Pose — ท่าทางศีรษะ</span><span class="mono">น้ำหนัก 35%</span></div>
+        <div style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--soft);">
+          วัดมุม Yaw (หันซ้าย-ขวา) และ Pitch (ก้ม-เงย) จาก rotation matrix จริงของ MediaPipe (3D head transform)<br><br>
+          🔵 <strong>|Yaw| &lt; 10° และ |Pitch| &lt; 12°</strong> = มองตรง → โฟกัส<br>
+          🟠 <strong>หันปานกลาง</strong> = วอกแวกเล็กน้อย<br>
+          🔴 <strong>|Yaw| &gt; 45° หรือ |Pitch| &gt; 42°</strong> = หันออก/ก้มหน้า<br><br>
+          <em>ใช้ค่าที่แย่ที่สุดระหว่าง yaw กับ pitch — หันหน้าหรือก้มหน้าอย่างใดอย่างหนึ่งก็ถือว่าไม่โฟกัส</em>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-hdr"><span class="card-t">👀 Gaze — ทิศทางสายตา</span><span class="mono">น้ำหนัก 25%</span></div>
+        <div style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--soft);">
+          วัดตำแหน่ง iris relative ต่อ eye corner จาก landmark 468 จุด<br><br>
+          🔵 <strong>Iris อยู่กลางตา</strong> = มองไปข้างหน้า → โฟกัส<br>
+          🟠 <strong>Iris เบี่ยงปานกลาง</strong> = มองเฉียง<br>
+          🔴 <strong>Iris เบี่ยงมาก</strong> = มองออกไปนอกหน้าจอ
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="card-t">📊 คะแนนรวม</span></div>
+        <div style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--soft);">
+          <code style="background:var(--bg);padding:3px 7px;border-radius:5px;font-size:12px;">
+            Score = EAR×0.4 + HeadPose×0.35 + Gaze×0.25
+          </code><br><br>
+          🔵 <strong>80–100%</strong> = โฟกัสดีมาก<br>
+          🟡 <strong>55–79%</strong> = ความสนใจปานกลาง<br>
+          🟠 <strong>35–54%</strong> = เริ่มวอกแวก<br>
+          🔴 <strong>0–34%</strong> = ไม่สนใจ / ง่วงนอน
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="panel" id="p-history">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div class="sec-l" style="margin-bottom:0;">ประวัติการสอน</div>
+      <div style="display:flex;gap:7px;">
+        <select class="sel" id="histR" onchange="renderHist()"></select>
+        <button class="btn btn-o" onclick="if(confirm('ล้างประวัติทั้งหมด?'))clearHist()" style="font-size:12px;padding:5px 10px;">🗑 ล้าง</button>
+      </div>
+    </div>
+    <div id="histList"></div>
+    <div class="empty" id="histEmpty" style="display:none;">
+      <div class="empty-ic">📊</div>
+      <div style="font-weight:600;">ยังไม่มีประวัติ</div>
+      <div style="font-size:12px;margin-top:4px;">กด "หยุด" หลังวิเคราะห์ ระบบจะบันทึกอัตโนมัติ</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+<div id="toast"></div>
+
+<script type="module">
+import { FaceLandmarker, FilesetResolver, DrawingUtils }
+  from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+
+// ── DB ──────────────────────────────────────────────────────
+const DB={
+  rooms(){return JSON.parse(localStorage.getItem('ca_rooms')||'["4/1","4/2","4/3","4/4","5/1","6/12"]');},
+  saveR(r){localStorage.setItem('ca_rooms',JSON.stringify(r));},
+  students(){return JSON.parse(localStorage.getItem('ca_students')||'[]');},
+  saveS(s){try{localStorage.setItem('ca_students',JSON.stringify(s));return true;}catch(e){return false;}},
+  history(){return JSON.parse(localStorage.getItem('ca_hist')||'[]');},
+  saveH(h){localStorage.setItem('ca_hist',JSON.stringify(h));}
+};
+
+// ── STATE ───────────────────────────────────────────────────
+let fl=null, stream=null, detecting=false;
+let startTime=null, durTimer=null, fpsTimer=null, fpsFr=0;
+let totalS=0, aggFoc=0, aggDro=0, aggAway=0;
+let tlData=[], tlAcc=[], tlTick=0, peakSc=0, peakT=null;
+let curRoom='';
+let smoothScore=null; // EMA smoothing for displayed score
+let useRec=false, regStream=null, capSig=null, capURL=null;
+let knownSigs=[]; // [{name,room,sig:[...]}]
+let stSt={}; // name -> {status, ts}
+// calibration
+let calibrating=false, calibSamples=[], calibEAR=0.28;
+const TL_MAX=30;
+const vid=document.getElementById('video');
+const ov=document.getElementById('ov');
+const ctx=ov.getContext('2d');
+
+// ── LOAD MEDIAPIPE ─────────────────────────────────────────
+async function init(){
+  ld('โหลด MediaPipe WASM...',20);
+  const vision=await FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+  );
+  ld('โหลด Face Landmarker model...',60);
+  fl=await FaceLandmarker.createFromOptions(vision,{
+    baseOptions:{
+      modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+      delegate:'GPU'
+    },
+    outputFaceBlendshapes:true,
+    outputFacialTransformationMatrixes:true,
+    runningMode:'VIDEO',
+    numFaces:10
+  });
+  ld('พร้อมใช้งาน!',100);
+  await sl(400);
+  document.getElementById('splash').classList.add('out');
+  setTimeout(()=>{
+    document.getElementById('splash').style.display='none';
+    document.getElementById('app').style.display='block';
+    initRooms(); loadKnown(); drawTL(); renderHist(); renderStudents();
+  },600);
+}
+
+function ld(m,p){document.getElementById('lm').textContent=m;document.getElementById('lf').style.width=p+'%';}
+
+// ── ROOMS ───────────────────────────────────────────────────
+function initRooms(){
+  const r=DB.rooms(); curRoom=r[0]||'ไม่ระบุ';
+  ['roomSel','histR','rgRoom','filterR'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    const all=(id==='histR'||id==='filterR');
+    el.innerHTML=all?'<option value="">ทุกห้อง</option>':'';
+    r.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent='📚 '+x;el.appendChild(o);});
+  });
+  document.getElementById('scRoom').textContent=curRoom;
+}
+window.onRoomChange=()=>{
+  curRoom=document.getElementById('roomSel').value;
+  document.getElementById('scRoom').textContent=curRoom;
+  const rg=document.getElementById('rgRoom');if(rg)rg.value=curRoom;
+};
+window.addRoom=()=>{
+  const n=document.getElementById('newRoom').value.trim();
+  if(!n){toast('กรุณาใส่ชื่อห้อง');return;}
+  const r=DB.rooms();if(r.includes(n)){toast('มีห้องนี้แล้ว');return;}
+  r.push(n);DB.saveR(r);initRooms();
+  document.getElementById('roomSel').value=n;onRoomChange();
+  cm('mRoom');toast('เพิ่มห้อง '+n+' แล้ว ✓');
+};
+
+// ── CAMERA ──────────────────────────────────────────────────
+window.startCam=async()=>{
+  const b=document.getElementById('btnS');
+  b.disabled=true;b.textContent='กำลังเปิด...';
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}
+    });
+    vid.srcObject=stream;
+    await new Promise(r=>vid.onloadedmetadata=r);
+    ov.width=vid.videoWidth; ov.height=vid.videoHeight;
+    document.getElementById('ph').style.display='none';
+    b.style.display='none';
+    document.getElementById('btnX').style.display='block';
+    document.getElementById('fBadge').style.display='block';
+    document.getElementById('vidBadges').style.display='flex';
+    startTime=Date.now(); detecting=true; smoothScore=null; stSt={};
+    durTimer=setInterval(updDur,1000);
+    fpsTimer=setInterval(()=>{document.getElementById('fpsD').textContent=fpsFr+' FPS';fpsFr=0;},1000);
+    setSt('กำลัง Calibrate',true);
+    // 3-second calibration
+    await runCalibration();
+    setSt('กำลังวิเคราะห์',true);
+    detectLoop();
+    toast('เริ่มวิเคราะห์แล้ว ✓');
+  }catch(e){
+    b.disabled=false;b.textContent='▶ เริ่มวิเคราะห์';
+    toast('ไม่สามารถเปิดกล้องได้');
+  }
+};
+
+window.stopCam=()=>{
+  detecting=false;clearInterval(durTimer);clearInterval(fpsTimer);
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  vid.srcObject=null; ctx.clearRect(0,0,ov.width,ov.height);
+  document.getElementById('ph').style.display='flex';
+  const b=document.getElementById('btnS');
+  b.style.display='block';b.disabled=false;b.textContent='▶ เริ่มวิเคราะห์';
+  document.getElementById('btnX').style.display='none';
+  document.getElementById('fBadge').style.display='none';
+  document.getElementById('vidBadges').style.display='none';
+  setSt('หยุดแล้ว',false);
+  saveSess(); toast('หยุดแล้ว — บันทึกข้อมูลเรียบร้อย ✓');
+};
+
+window.resetStats=()=>{
+  aggFoc=aggDro=aggAway=totalS=0;
+  tlData=[];tlAcc=[];tlTick=0;peakSc=0;peakT=null;smoothScore=null;
+  startTime=detecting?Date.now():null;
+  updUI(true);drawTL();toast('รีเซ็ตแล้ว');
+};
+
+// ── CALIBRATION ─────────────────────────────────────────────
+async function runCalibration(){
+  const co=document.getElementById('calibOv');
+  const cm_el=document.getElementById('calibMsg');
+  const cc=document.getElementById('calibCnt');
+  co.style.display='flex'; calibrating=true; calibSamples=[];
+  for(let i=3;i>=1;i--){
+    cc.textContent=i;
+    await sl(1000);
+    // collect EAR sample
+    const r=fl.detectForVideo(vid,performance.now());
+    if(r.faceLandmarks&&r.faceLandmarks.length>0){
+      calibSamples.push(computeEAR(r.faceLandmarks[0]));
+    }
+  }
+  if(calibSamples.length>0){
+    const avg=calibSamples.reduce((a,b)=>a+b,0)/calibSamples.length;
+    calibEAR=avg; // use personal baseline
+    cm_el.textContent='Calibrate สำเร็จ EAR baseline = '+avg.toFixed(3);
+  }
+  await sl(600); co.style.display='none'; calibrating=false;
+}
+
+// ── FACE SIGNATURE (geometry-based recognition) ─────────────
+// Build a scale/rotation-invariant signature from key landmark distances.
+// Uses inter-ocular distance as the normalizer so it works at any face size.
+const SIG_POINTS=[33,133,362,263,1,168,61,291,199,10,234,454,152,168,4,0,17];
+function computeSignature(lm){
+  const io=Math.hypot(lm[33].x-lm[263].x, lm[33].y-lm[263].y)||0.001; // outer eye corners
+  const sig=[];
+  for(let i=0;i<SIG_POINTS.length;i++){
+    for(let j=i+1;j<SIG_POINTS.length;j++){
+      const a=lm[SIG_POINTS[i]], b=lm[SIG_POINTS[j]];
+      sig.push(Math.hypot(a.x-b.x,a.y-b.y)/io);
+    }
+  }
+  return sig;
+}
+function sigDistance(a,b){
+  if(!a||!b||a.length!==b.length)return Infinity;
+  let s=0;for(let i=0;i<a.length;i++){const d=a[i]-b[i];s+=d*d;}
+  return Math.sqrt(s/a.length);
+}
+function matchFace(sig){
+  if(!knownSigs.length)return null;
+  let best=null,bd=0.045; // threshold (tuned for geometry signature)
+  knownSigs.forEach(k=>{const d=sigDistance(sig,k.sig);if(d<bd){bd=d;best=k;}});
+  return best;
+}
+function loadKnown(){
+  knownSigs=DB.students().filter(s=>s.sig).map(s=>({name:s.name,room:s.room,sig:s.sig}));
+}
+
+// ── RECOGNITION TOGGLE ──────────────────────────────────────
+window.onRecToggle=()=>{
+  useRec=document.getElementById('recTog').checked;
+  document.getElementById('tabRegister').style.display=useRec?'block':'none';
+  document.getElementById('tabStudents').style.display=useRec?'block':'none';
+  document.getElementById('slCard').style.display=useRec?'block':'none';
+  toast(useRec?'🔵 เปิดจดจำใบหน้า — มีแท็บลงทะเบียนแล้ว':'🔒 ปิดจดจำใบหน้า (โหมด anonymous)');
+};
+
+// ── REGISTER CAMERA ─────────────────────────────────────────
+window.startRegCam=async()=>{
+  if(regStream)return;
+  try{
+    regStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640}}});
+    const rv=document.getElementById('regVideo');rv.srcObject=regStream;
+    document.getElementById('rgPh').style.display='none';
+    document.getElementById('btnCap').disabled=false;
+    document.getElementById('btnRC').textContent='📷 กล้องเปิดอยู่';
+  }catch(e){toast('ไม่สามารถเปิดกล้องได้');}
+};
+window.captureStudent=async()=>{
+  const rv=document.getElementById('regVideo');
+  if(!rv.srcObject){toast('กรุณาเปิดกล้องก่อน');return;}
+  document.getElementById('rgSt').textContent='กำลังตรวจจับใบหน้า...';
+  const r=fl.detectForVideo(rv,performance.now());
+  if(!r.faceLandmarks||r.faceLandmarks.length===0){
+    document.getElementById('rgSt').textContent='⚠️ ไม่พบใบหน้า ลองอีกครั้ง';return;
+  }
+  const lm=r.faceLandmarks[0];
+  capSig=computeSignature(lm);
+  // crop preview
+  let minX=1,minY=1,maxX=0,maxY=0;
+  lm.forEach(p=>{if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;});
+  const tc=document.createElement('canvas');
+  const pad=0.06,vw=rv.videoWidth,vh=rv.videoHeight;
+  const sx=Math.max(0,(minX-pad)*vw),sy=Math.max(0,(minY-pad)*vh);
+  const sw=Math.min(vw-sx,(maxX-minX+pad*2)*vw),sh=Math.min(vh-sy,(maxY-minY+pad*2)*vh);
+  tc.width=sw;tc.height=sh;
+  tc.getContext('2d').drawImage(rv,sx,sy,sw,sh,0,0,sw,sh);
+  capURL=tc.toDataURL('image/jpeg',.8);
+  const p=document.getElementById('capPrev');p.src=capURL;p.style.display='block';
+  document.getElementById('btnSave').disabled=false;
+  document.getElementById('rgSt').textContent='✅ ตรวจจับใบหน้าสำเร็จ!';
+};
+window.saveStudent=()=>{
+  const name=document.getElementById('rgName').value.trim();
+  const room=document.getElementById('rgRoom').value;
+  const note=document.getElementById('rgNote').value.trim();
+  if(!name){toast('กรุณาใส่ชื่อนักเรียน');return;}
+  if(!capSig){toast('กรุณาถ่ายรูปก่อน');return;}
+  const s=DB.students();
+  if(s.some(x=>x.name===name&&x.room===room)){toast('มีนักเรียนชื่อนี้ในห้องนี้แล้ว');return;}
+  s.push({id:Date.now(),name,room,note,photo:capURL,sig:capSig});
+  if(!DB.saveS(s)){toast('พื้นที่เก็บข้อมูลเต็ม — ลบนักเรียนเก่าบ้าง');return;}
+  loadKnown();
+  capSig=null;capURL=null;
+  document.getElementById('rgName').value='';document.getElementById('rgNote').value='';
+  document.getElementById('capPrev').style.display='none';
+  document.getElementById('btnSave').disabled=true;
+  document.getElementById('rgSt').textContent='';
+  renderStudents();toast('บันทึก '+name+' แล้ว ✓');
+};
+
+// ── STUDENT MANAGEMENT ──────────────────────────────────────
+function renderStudents(){
+  const fr=document.getElementById('filterR')?.value||'';
+  const ss=DB.students().filter(s=>!fr||s.room===fr);
+  const g=document.getElementById('smGrid'),e=document.getElementById('smEmpty');
+  if(!g)return;
+  if(ss.length===0){g.style.display='none';e.style.display='block';return;}
+  e.style.display='none';g.style.display='grid';
+  g.innerHTML=ss.map(s=>`<div class="sm-item">
+    ${s.photo?`<img class="sm-photo" src="${s.photo}" alt="">`:`<div class="sm-ph">👤</div>`}
+    <div class="sm-name">${s.name}</div><div class="sm-room">📚 ${s.room}</div>
+    ${s.note?`<div style="font-size:10px;color:var(--soft)">${s.note}</div>`:''}
+    <button class="btn-del" onclick="delStudent(${s.id})">🗑 ลบ</button></div>`).join('');
+}
+window.delStudent=(id)=>{
+  if(!confirm('ลบนักเรียนคนนี้?'))return;
+  DB.saveS(DB.students().filter(s=>s.id!==id));loadKnown();renderStudents();toast('ลบแล้ว');
+};
+window.clearStudents=()=>{DB.saveS([]);loadKnown();renderStudents();toast('ล้างรายชื่อแล้ว');};
+window.renderStudents=renderStudents;
+
+function renderSlBody(){
+  const ss=DB.students().filter(s=>s.room===curRoom);
+  const lb=document.getElementById('slBody'),pc=document.getElementById('presCount');
+  if(!lb)return;
+  const now=Date.now();let present=0;
+  if(ss.length===0){lb.innerHTML='<div style="padding:10px 14px;font-size:12px;color:var(--soft);">ไม่มีนักเรียนลงทะเบียนในห้องนี้</div>';pc.textContent='0 คน';return;}
+  lb.innerHTML=ss.map(s=>{
+    const st=stSt[s.name];const fresh=st&&(now-st.ts<3000);if(fresh)present++;
+    const sc=fresh?('s-'+st.status):'s-un';
+    const sl=fresh?(st.status==='foc'?'โฟกัส':st.status==='dro'?'วอกแวก':'ไม่สนใจ'):'ไม่พบ';
+    return `<div class="sl-row">
+      ${s.photo?`<img class="sl-av" src="${s.photo}">`:`<div class="sl-av-ph">👤</div>`}
+      <div class="sl-name">${s.name}</div><span class="sl-st ${sc}">${sl}</span></div>`;
+  }).join('');
+  pc.textContent=present+'/'+ss.length+' คน';
+}
+
+// ── EAR ────────────────────────────────────────────────────
+// MediaPipe 478 landmarks — left eye: 33,160,158,133,153,144  right: 362,385,387,263,373,380
+const L_EYE=[33,160,158,133,153,144];
+const R_EYE=[362,385,387,263,373,380];
+
+function computeEAR(lm){
+  function ear(idx){
+    const p=i=>({x:lm[idx[i]].x,y:lm[idx[i]].y});
+    const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+    return (d(p(1),p(5))+d(p(2),p(4)))/(2*d(p(0),p(3)));
+  }
+  return (ear(L_EYE)+ear(R_EYE))/2;
+}
+
+// ── GAZE (iris offset) ──────────────────────────────────────
+// Left iris center: 473, left eye corners: 33(outer) 133(inner)
+// Right iris center: 468, right eye corners: 362(outer) 263(inner)
+function computeGaze(lm){
+  function irisOffset(irisIdx,outerIdx,innerIdx){
+    const iris=lm[irisIdx];
+    const outer=lm[outerIdx];
+    const inner=lm[innerIdx];
+    const eyeW=Math.abs(inner.x-outer.x)||0.001;
+    const irisX=(iris.x-outer.x)/eyeW; // 0=outer 1=inner
+    return Math.abs(irisX-0.5)*2; // 0=center 1=extreme
+  }
+  const L=irisOffset(473,33,133);
+  const R=irisOffset(468,362,263);
+  return (L+R)/2; // 0=looking forward, 1=looking far sideways
+}
+
+// ── HEAD POSE via 4x4 transformation matrix ────────────────
+// MediaPipe returns a column-major 4x4 matrix. Decompose to yaw/pitch/roll (degrees).
+function headPoseFromMatrix(mtx){
+  if(!mtx||!mtx.data)return{yaw:0,pitch:0,roll:0};
+  const m=mtx.data; // length 16, column-major
+  // rotation elements (row-major access from column-major array)
+  const r00=m[0], r01=m[4], r02=m[8];
+  const r10=m[1], r11=m[5], r12=m[9];
+  const r20=m[2], r21=m[6], r22=m[10];
+  const deg=180/Math.PI;
+  let pitch,yaw,roll;
+  const sy=Math.sqrt(r00*r00+r10*r10);
+  if(sy>1e-6){
+    pitch=Math.atan2(r21,r22)*deg;
+    yaw  =Math.atan2(-r20,sy)*deg;
+    roll =Math.atan2(r10,r00)*deg;
+  }else{
+    pitch=Math.atan2(-r12,r11)*deg;
+    yaw  =Math.atan2(-r20,sy)*deg;
+    roll =0;
+  }
+  return{yaw,pitch,roll};
+}
+
+// ── ATTENTION SCORE ─────────────────────────────────────────
+function attentionScore(ear,gaze,pose){
+  // EAR score: relative to calibrated baseline
+  const earRatio=Math.min(ear/calibEAR,1.2);
+  const earSc=earRatio>=0.85?1:earRatio>=0.60?(earRatio-0.4)/0.45:Math.max(0,earRatio*0.4);
+
+  // Head pose score: yaw (turn L/R) penalised past 20°, pitch (look down) past 18°
+  const yawN=Math.max(0,1-Math.max(0,Math.abs(pose.yaw)-10)/35);
+  const pitchN=Math.max(0,1-Math.max(0,Math.abs(pose.pitch)-12)/30);
+  const poseSc=Math.min(yawN,pitchN); // worst of the two — turning OR looking down both hurt
+
+  // Gaze score: 0=forward 1=far away; if iris missing gaze=0.5 neutral
+  const g=(isNaN(gaze)||gaze==null)?0.3:gaze;
+  const gazeSc=Math.max(0,1-g*1.8);
+
+  const total=Math.min(1,earSc*0.40+poseSc*0.35+gazeSc*0.25);
+  return{total,earSc,poseSc,gazeSc};
+}
+
+function classifyAttention(score){
+  if(score>=0.80)return'focused';
+  if(score>=0.45)return'drowsy';
+  return'away';
+}
+
+// ── DETECT LOOP ─────────────────────────────────────────────
+async function detectLoop(){
+  if(!detecting)return;
+  if(vid.readyState<2){setTimeout(detectLoop,120);return;}
+
+  const res=fl.detectForVideo(vid,performance.now());
+  ctx.clearRect(0,0,ov.width,ov.height);
+  fpsFr++;
+
+  const W=ov.width,H=ov.height;
+  const faces=res.faceLandmarks||[];
+  document.getElementById('fBadge').textContent=faces.length+' ใบหน้า';
+  document.getElementById('stF').textContent=faces.length;
+
+  if(faces.length>0){
+    let frameFoc=0,frameDro=0,frameAway=0;
+    let sumEAR=0,sumGaze=0,sumYaw=0,sumPitch=0;
+
+    faces.forEach((lm,i)=>{
+      const ear=computeEAR(lm);
+      const gaze=computeGaze(lm);
+      const mtx=res.facialTransformationMatrixes?res.facialTransformationMatrixes[i]:null;
+      const pose=headPoseFromMatrix(mtx);
+      const {total,earSc,poseSc,gazeSc}=attentionScore(ear,gaze,pose);
+      const cls=classifyAttention(total);
+      sumEAR+=ear;sumGaze+=gaze;sumYaw+=Math.abs(pose.yaw);sumPitch+=Math.abs(pose.pitch);
+
+      if(cls==='focused'){aggFoc++;frameFoc++;}
+      else if(cls==='drowsy'){aggDro++;frameDro++;}
+      else{aggAway++;frameAway++;}
+      totalS++;
+
+      // Face recognition match
+      const stClass=cls==='focused'?'foc':cls==='drowsy'?'dro':'away';
+      let nameLabel='';
+      if(useRec){
+        const sig=computeSignature(lm);
+        const m=matchFace(sig);
+        if(m){nameLabel=m.name+' · ';stSt[m.name]={status:stClass,ts:Date.now()};}
+      }
+
+      // Draw face box from bounding box of landmarks
+      let minX=1,minY=1,maxX=0,maxY=0;
+      lm.forEach(p=>{if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;});
+      // mirror x for overlay (video is CSS-mirrored, overlay is not)
+      const bx=(1-maxX)*W, by=minY*H, bw=(maxX-minX)*W, bh=(maxY-minY)*H;
+      const col=cls==='focused'?'#2563EB':cls==='drowsy'?'#D97706':'#DC2626';
+      const lbl=cls==='focused'?'โฟกัส':cls==='drowsy'?'ง่วง/วอกแวก':'ไม่สนใจ';
+      const icon=cls==='focused'?'🔵':cls==='drowsy'?'🟠':'🔴';
+      const fullLbl=icon+' '+nameLabel+lbl;
+
+      ctx.strokeStyle=col;ctx.lineWidth=2.5;
+      ctx.beginPath();
+      if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,7);else ctx.rect(bx,by,bw,bh);
+      ctx.stroke();
+      ctx.font='13px Sarabun,sans-serif';
+      const tw=ctx.measureText(fullLbl).width+14;
+      ctx.fillStyle=col;
+      ctx.beginPath();
+      if(ctx.roundRect)ctx.roundRect(bx,by-22,tw,20,5);else ctx.rect(bx,by-22,tw,20);
+      ctx.fill();
+      ctx.fillStyle='#fff';ctx.fillText(fullLbl,bx+7,by-7);
+
+      // Draw iris points (gaze visualization)
+      [473,468].forEach(idx=>{
+        const p=lm[idx];
+        const px=(1-p.x)*W, py=p.y*H;
+        ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);
+        ctx.fillStyle=gazeSc>0.5?'#60A5FA':'#F87171';ctx.fill();
+      });
+    });
+
+    // Update signal cards
+    const n=faces.length;
+    const avgEAR=sumEAR/n;
+    const avgGaze=sumGaze/n;
+    const avgYaw=sumYaw/n;
+    const sc=attentionScore(avgEAR,avgGaze,{yaw:avgYaw,pitch:sumPitch/n});
+
+    updSignals(avgEAR,avgGaze,avgYaw,sc);
+
+    // Timeline with EMA smoothing
+    const roomAvg=(frameFoc*1+frameDro*0.45)/faces.length;
+    smoothScore=smoothScore===null?roomAvg:smoothScore*0.7+roomAvg*0.3;
+    tlAcc.push(smoothScore);tlTick++;
+    if(tlTick>=8){
+      const avg=tlAcc.reduce((a,b)=>a+b,0)/tlAcc.length;
+      tlData.push(avg);if(tlData.length>TL_MAX)tlData.shift();
+      tlAcc=[];tlTick=0;
+      if(avg>peakSc&&startTime){peakSc=avg;peakT=fmt(Math.floor((Date.now()-startTime)/1000));document.getElementById('stP').textContent=peakT;}
+      drawTL();
+    }
+    updUI();
+    if(useRec)renderSlBody();
+
+    // Video badge colors
+    updBadge('bdEAR','bdEARTxt','EAR '+avgEAR.toFixed(2),sc.earSc);
+    updBadge('bdHP','bdHPTxt','Pose '+avgYaw.toFixed(0)+'°',sc.poseSc);
+    updBadge('bdGaze','bdGazeTxt','Gaze '+avgGaze.toFixed(2),sc.gazeSc);
+  }
+  document.getElementById('stS').textContent=totalS;
+  setTimeout(()=>{if(detecting)requestAnimationFrame(detectLoop);},80);
+}
+
+function updBadge(dotId,txtId,txt,score){
+  const col=score>=0.7?'#34D399':score>=0.4?'#FCD34D':'#F87171';
+  document.getElementById(dotId).style.background=col;
+  document.getElementById(txtId).textContent=txt;
+}
+
+// ── UI UPDATE ────────────────────────────────────────────────
+function updSignals(ear,gaze,yaw,sc){
+  const earPct=Math.round(sc.earSc*100);
+  const posePct=Math.round(sc.poseSc*100);
+  const gazePct=Math.round(sc.gazeSc*100);
+  const earCol=earPct>=70?'var(--focused)':earPct>=45?'var(--drowsy)':'var(--away)';
+  const poseCol=posePct>=70?'var(--focused)':posePct>=45?'var(--drowsy)':'var(--away)';
+  const gazeCol=gazePct>=70?'var(--focused)':gazePct>=45?'var(--drowsy)':'var(--away)';
+
+  document.getElementById('sigEAR').textContent=ear.toFixed(3);
+  document.getElementById('sigEAR').style.color=earCol;
+  document.getElementById('sigEARLbl').textContent=earPct>=70?'ตาเปิดปกติ':earPct>=45?'ตาหรี่':' หลับ/ก้มหน้า';
+  document.getElementById('sigEARLbl').style.color=earCol;
+  document.getElementById('sigEARBar').style.width=earPct+'%';
+  document.getElementById('sigEARBar').style.background=earCol;
+
+  document.getElementById('sigHP').textContent=yaw.toFixed(0)+'°';
+  document.getElementById('sigHP').style.color=poseCol;
+  document.getElementById('sigHPLbl').textContent=posePct>=70?'มองตรง':posePct>=45?'หันเล็กน้อย':'หันออก';
+  document.getElementById('sigHPLbl').style.color=poseCol;
+  document.getElementById('sigHPBar').style.width=posePct+'%';
+  document.getElementById('sigHPBar').style.background=poseCol;
+
+  document.getElementById('sigGaze').textContent=gaze.toFixed(3);
+  document.getElementById('sigGaze').style.color=gazeCol;
+  document.getElementById('sigGazeLbl').textContent=gazePct>=70?'มองตรง':gazePct>=45?'มองเฉียง':'มองออก';
+  document.getElementById('sigGazeLbl').style.color=gazeCol;
+  document.getElementById('sigGazeBar').style.width=gazePct+'%';
+  document.getElementById('sigGazeBar').style.background=gazeCol;
+}
+
+function updUI(reset=false){
+  const t=aggFoc+aggDro+aggAway;
+  if(t===0||reset){
+    document.getElementById('scV').textContent='—';document.getElementById('scV').style.color='var(--soft)';
+    document.getElementById('scSt').textContent=reset?'รีเซ็ตแล้ว':'ยังไม่ได้เริ่ม';
+    document.getElementById('scHint').textContent='กดเริ่มวิเคราะห์เพื่อดูผล';
+    document.getElementById('scBar').style.width='0%';
+    ['Foc','Dro','Away'].forEach(k=>{
+      document.getElementById('b'+k).style.width='0%';
+      document.getElementById('p'+k).textContent='0%';
+    });
+    return;
+  }
+  const fP=Math.round(aggFoc/t*100),dP=Math.round(aggDro/t*100),aP=Math.round(aggAway/t*100);
+  const sc=Math.round((aggFoc*100+aggDro*45)/t);
+  let st,hint,col;
+  if(sc>=80){st='🔵 ห้องเรียนโฟกัสดีมาก';hint='นักเรียนกำลังตั้งใจ';col='var(--focused)';}
+  else if(sc>=55){st='🟡 ความสนใจปานกลาง';hint='ลองเพิ่มกิจกรรมมีส่วนร่วม';col='var(--drowsy)';}
+  else if(sc>=35){st='🟠 เริ่มวอกแวก';hint='ควรพักหรือเปลี่ยนรูปแบบการสอน';col='var(--drowsy)';}
+  else{st='🔴 นักเรียนไม่สนใจ';hint='แนะนำหยุดพักทันที';col='var(--away)';}
+  document.getElementById('scV').textContent=sc+'%';document.getElementById('scV').style.color=col;
+  document.getElementById('scSt').textContent=st;document.getElementById('scHint').textContent=hint;
+  document.getElementById('scBar').style.width=sc+'%';document.getElementById('scBar').style.background=col;
+  document.getElementById('bFoc').style.width=fP+'%';
+  document.getElementById('bDro').style.width=dP+'%';
+  document.getElementById('bAway').style.width=aP+'%';
+  document.getElementById('pFoc').textContent=fP+'%';
+  document.getElementById('pDro').textContent=dP+'%';
+  document.getElementById('pAway').textContent=aP+'%';
+}
+
+// ── TIMELINE ─────────────────────────────────────────────────
+function drawTL(){
+  const c=document.getElementById('tlc');const w=c.offsetWidth,h=70;
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  const x=c.getContext('2d');x.scale(devicePixelRatio,devicePixelRatio);
+  x.clearRect(0,0,w,h);
+  if(tlData.length<2){x.fillStyle='#bbb';x.font='11px Sarabun,sans-serif';x.textAlign='center';x.fillText('กำลังรวบรวมข้อมูล...',w/2,h/2+4);return;}
+  [.25,.5,.75,1].forEach(v=>{
+    const y=h-v*(h-10)-5;
+    x.strokeStyle='#E2E0D8';x.lineWidth=1;x.setLineDash([3,3]);
+    x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke();x.setLineDash([]);
+  });
+  const step=(w-12)/(TL_MAX-1);
+  const g=x.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'rgba(37,99,235,.22)');g.addColorStop(1,'rgba(37,99,235,0)');
+  x.beginPath();
+  tlData.forEach((v,i)=>{const px=6+i*step,py=h-v*(h-10)-5;i===0?x.moveTo(px,py):x.lineTo(px,py);});
+  x.lineTo(6+(tlData.length-1)*step,h);x.lineTo(6,h);x.closePath();x.fillStyle=g;x.fill();
+  x.beginPath();x.strokeStyle='#2563EB';x.lineWidth=2;x.lineJoin='round';
+  tlData.forEach((v,i)=>{const px=6+i*step,py=h-v*(h-10)-5;i===0?x.moveTo(px,py):x.lineTo(px,py);});
+  x.stroke();
+  const lx=6+(tlData.length-1)*step,ly=h-tlData[tlData.length-1]*(h-10)-5;
+  x.beginPath();x.arc(lx,ly,3.5,0,Math.PI*2);x.fillStyle='#2563EB';x.fill();
+}
+
+// ── HISTORY ─────────────────────────────────────────────────
+function saveSess(){
+  const t=aggFoc+aggDro+aggAway;if(t<5)return;
+  const sc=Math.round((aggFoc*100+aggDro*45)/t);
+  const h=DB.history();
+  h.unshift({id:Date.now(),room:curRoom,score:sc,
+    foc:Math.round(aggFoc/t*100),dro:Math.round(aggDro/t*100),away:Math.round(aggAway/t*100),
+    samples:totalS,dur:document.getElementById('stD').textContent,
+    date:new Date().toLocaleString('th-TH'),tl:[...tlData]});
+  if(h.length>100)h.splice(100);DB.saveH(h);renderHist();
+}
+function renderHist(){
+  const fr=document.getElementById('histR')?.value||'';
+  const h=DB.history().filter(x=>!fr||x.room===fr);
+  const l=document.getElementById('histList'),e=document.getElementById('histEmpty');
+  if(!l)return;
+  if(h.length===0){l.innerHTML='';e.style.display='block';return;}
+  e.style.display='none';
+  l.innerHTML=h.map(x=>{
+    const c=x.score>=80?'var(--focused)':x.score>=55?'var(--drowsy)':'var(--away)';
+    return `<div class="h-card">
+      <div class="h-hdr">
+        <div><div class="h-room">📚 ห้อง ${x.room}</div><div class="h-time">${x.date} · ${x.dur}</div></div>
+        <div class="h-sc" style="color:${c}">${x.score}%</div>
+      </div>
+      <div class="h-sigs">
+        <span style="color:var(--focused)">🔵 โฟกัส ${x.foc}%</span>
+        <span style="color:var(--drowsy)">🟠 วอกแวก ${x.dro}%</span>
+        <span style="color:var(--away)">🔴 ไม่สนใจ ${x.away}%</span>
+        <span>${x.samples} ตัวอย่าง</span>
+      </div>
+      <div class="h-bars">
+        <div class="h-seg" style="width:${x.foc}%;background:var(--focused)"></div>
+        <div class="h-seg" style="width:${x.dro}%;background:var(--drowsy)"></div>
+        <div class="h-seg" style="width:${x.away}%;background:var(--away)"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.clearHist=()=>{DB.saveH([]);renderHist();toast('ล้างประวัติแล้ว');};
+window.renderHist=renderHist;
+
+// ── EXPORT ───────────────────────────────────────────────────
+window.exportCSV=()=>{
+  const t=aggFoc+aggDro+aggAway;if(t===0){toast('ยังไม่มีข้อมูล');return;}
+  const sc=Math.round((aggFoc*100+aggDro*45)/t);
+  const rows=[
+    ['เวลา',new Date().toLocaleString('th-TH')],['ห้อง',curRoom],['คะแนน',sc+'%'],
+    ['โฟกัส',Math.round(aggFoc/t*100)+'%'],['วอกแวก/ง่วง',Math.round(aggDro/t*100)+'%'],
+    ['ไม่สนใจ',Math.round(aggAway/t*100)+'%'],['EAR baseline',calibEAR.toFixed(4)],
+    ['ตัวอย่าง',totalS],['เวลาวิเคราะห์',document.getElementById('stD').textContent],
+    ['ช่วงสนใจมากสุด',peakT||'—'],
+    [],[' Timeline (Attention Score 0-1)'],
+    ...tlData.map((v,i)=>[i+1,v.toFixed(3)])
+  ];
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));
+  a.download='attention-'+curRoom+'-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  toast('ดาวน์โหลดรายงานแล้ว ✓');
+};
+
+// ── HELPERS ──────────────────────────────────────────────────
+function updDur(){if(!startTime)return;document.getElementById('stD').textContent=fmt(Math.floor((Date.now()-startTime)/1000));}
+function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function setSt(t,a){const p=document.getElementById('pill');document.getElementById('pillTxt').textContent=t;p.classList.toggle('on',a);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600);}
+function sl(ms){return new Promise(r=>setTimeout(r,ms));}
+window.om=(id)=>document.getElementById(id).classList.add('open');
+window.cm=(id)=>document.getElementById(id).classList.remove('open');
+window.swTab=(n)=>{
+  const names=['live','register','students','signals','history'];
+  document.querySelectorAll('.tab').forEach((t)=>{
+    const txt=t.textContent;
+    t.classList.toggle('on',
+      (n==='live'&&txt.includes('Live'))||
+      (n==='register'&&txt.includes('ลงทะเบียน'))||
+      (n==='students'&&txt.includes('รายชื่อ'))||
+      (n==='signals'&&txt.includes('สัญญาณ'))||
+      (n==='history'&&txt.includes('ประวัติ')));
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+n).classList.add('on');
+  // free register camera when leaving that tab
+  if(n!=='register'&&regStream){
+    regStream.getTracks().forEach(t=>t.stop());regStream=null;
+    document.getElementById('regVideo').srcObject=null;
+    document.getElementById('rgPh').style.display='flex';
+    document.getElementById('btnRC').textContent='เปิดกล้อง';
+    document.getElementById('btnCap').disabled=true;
+  }
+  if(n==='students')renderStudents();
+  if(n==='history')renderHist();
+};
+
+init();
+</script>
+</body>
+</html>
