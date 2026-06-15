@@ -200,6 +200,12 @@ function App() {
                   {p.tags.slice(0, p.feature ? 5 : 3).map((tg, i) => <span key={i} className="tag">{tg}</span>)}
                   <span className="card-outcome">{tr(p.outcome)}</span>
                 </div>
+                {(p.liveUrl || p.githubUrl) && (
+                  <div className="card-links">
+                    {p.liveUrl && <a className="card-link card-link--live" href={p.liveUrl} target="_blank" rel="noreferrer">Live ↗</a>}
+                    {p.githubUrl && <a className="card-link card-link--gh" href={p.githubUrl} target="_blank" rel="noreferrer">GitHub ↗</a>}
+                  </div>
+                )}
               </article>
             ))}
           </div>
