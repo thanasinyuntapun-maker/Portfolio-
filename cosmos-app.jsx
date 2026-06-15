@@ -228,7 +228,7 @@ function App() {
                   <span className="svc-num">{s.num}</span>
                   <span className="svc-tag">{tr(s.tag)}</span>
                 </div>
-                <h3>{tr(s.title)}</h3>
+                <h3>{tr(s.title)}{s.titleSub && <span className="svc-sub"> — {tr(s.titleSub)}</span>}</h3>
                 <p>{tr(s.desc)}</p>
                 <div className="svc-bullets">
                   {s.bullets.map((b, i) => <span key={i} className="tag">{b}</span>)}
