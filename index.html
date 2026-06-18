@@ -34,11 +34,143 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
   <link rel="stylesheet" href="cosmos.css" />
+
+  <style>
+    /* ---- Black-Hole additions on top of cosmos.css ---- */
+    .hero { position: relative; z-index: 2; }
+
+    /* Lighter scrim so the accretion disk reads as the hero showcase.
+       Heavy only on the far-left where the headline sits; clears center-right. */
+    #scrim {
+      background:
+        linear-gradient(90deg, rgba(5,5,5,0.86) 0%, rgba(5,5,5,0.5) 26%, rgba(5,5,5,0.08) 54%, rgba(5,5,5,0) 70%),
+        linear-gradient(180deg, rgba(5,5,5,0) 0%, rgba(5,5,5,0) 52%, rgba(5,5,5,0.86) 74%, var(--bg) 90%) !important;
+    }
+    /* Keep the headline crisp where it overlaps the disk */
+    .hero h1, .hero .lede, .hero .eyebrow { text-shadow: 0 2px 26px rgba(5,5,5,0.85); }
+
+    /* warp flash */
+    .warp-flash {
+      position: fixed; inset: 0; background: #fff; z-index: 900;
+      opacity: 0; pointer-events: none; transition: opacity .5s ease-out;
+    }
+    .warp-flash.on { opacity: 1; transition: opacity .25s ease-in; }
+
+    /* orbiting tech badges (hero only, fade on scroll) */
+    .badge-layer { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; transition: opacity .5s ease; }
+    .orbit-badge {
+      position: absolute;
+      background: rgba(12,12,14,0.45); backdrop-filter: blur(6px);
+      border: 1px solid var(--line); padding: 5px 12px; border-radius: 999px;
+      font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: .02em;
+      color: var(--muted); animation: float-orbit 20s infinite linear;
+    }
+    .orbit-badge.b0 { top: 22%; left: 8%;  animation-delay: 0s; }
+    .orbit-badge.b1 { top: 16%; right: 10%; animation-delay: -5s; }
+    .orbit-badge.b2 { top: 66%; left: 11%; animation-delay: -12s; }
+    .orbit-badge.b3 { top: 58%; right: 8%; animation-delay: -8s; }
+    .orbit-badge.b4 { top: 82%; left: 46%; animation-delay: -2s; }
+    .orbit-badge.b5 { top: 30%; right: 24%; animation-delay: -15s; }
+    @keyframes float-orbit {
+      0%   { transform: translate(0,0) rotate(0); }
+      33%  { transform: translate(15px,-20px) rotate(4deg); }
+      66%  { transform: translate(-10px,15px) rotate(-4deg); }
+      100% { transform: translate(0,0) rotate(0); }
+    }
+    @media (max-width: 860px) { .badge-layer { display: none; } }
+
+    /* AI deep-dive button on cards */
+    .deep-btn {
+      margin-top: 18px; width: 100%;
+      background: var(--accent-soft); color: var(--accent);
+      font-family: 'Space Mono', monospace; font-size: 12.5px; letter-spacing: .02em;
+      padding: 11px; border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--accent-soft); transition: background .2s, border-color .2s;
+    }
+    .deep-btn:hover { background: rgba(255,90,54,0.26); border-color: var(--accent); }
+
+    /* Ask-AI-clone box */
+    .ai-box {
+      margin-top: 28px; position: relative; overflow: hidden;
+      border: 1px solid var(--line-strong); border-radius: 16px;
+      padding: clamp(26px,4vw,36px);
+      background: linear-gradient(180deg, rgba(18,18,22,0.6), rgba(10,10,12,0.6));
+      backdrop-filter: blur(10px);
+    }
+    .ai-box .topline { position: absolute; top: 0; left: 0; width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .6; }
+    .ai-box h3 { font-size: 20px; font-weight: 500; margin: 0 0 8px; letter-spacing: -0.01em; }
+    .ai-box .lede { color: var(--muted); font-size: 14.5px; font-weight: 300; line-height: 1.6; margin: 0 0 22px; max-width: 60ch; }
+    .ai-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .ai-row input {
+      flex: 1; min-width: 220px; background: rgba(5,5,5,0.6);
+      border: 1px solid var(--line-strong); border-radius: 8px; padding: 14px 16px;
+      font-family: 'Space Mono', monospace; font-size: 13.5px; color: var(--text); transition: border-color .2s;
+    }
+    .ai-row input:focus { outline: none; border-color: var(--accent); }
+    .ai-row input::placeholder { color: var(--faint); }
+    .ai-row button {
+      background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+      padding: 14px 28px; font-family: 'Kanit', sans-serif; font-weight: 500; font-size: 15px;
+      cursor: pointer; box-shadow: 0 0 24px -6px var(--glow); transition: transform .2s;
+    }
+    .ai-row button:hover { transform: translateY(-2px); }
+    .ai-answer { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 18px;
+      font-size: 14.5px; line-height: 1.7; color: #d7dae0; }
+    .ai-answer .label { display: block; font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .loading { color: var(--accent); font-family: 'Space Mono', monospace; font-size: 13px;
+      animation: bh-pulse 1.5s infinite; }
+
+    /* AI modal */
+    .ai-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center;
+      justify-content: center; padding: 20px; background: rgba(5,5,5,0.7); backdrop-filter: blur(8px);
+      opacity: 0; animation: bh-fade .25s forwards; }
+    .ai-modal-card {
+      position: relative; background: var(--bg-2); border: 1px solid var(--line-strong);
+      border-radius: 18px; padding: clamp(26px,4vw,38px); max-width: 660px; width: 100%;
+      max-height: 85vh; display: flex; flex-direction: column;
+      box-shadow: 0 0 60px rgba(255,90,54,0.12); transform: scale(.96); animation: bh-pop .25s forwards;
+    }
+    .ai-modal-card h3 { font-size: 22px; font-weight: 500; margin: 0; letter-spacing: -0.01em;
+      display: flex; align-items: center; gap: 12px; }
+    .modal-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 14px var(--glow); flex: none; }
+    .ai-modal-sub { font-family: 'Space Mono', monospace; font-size: 12.5px; color: var(--faint);
+      margin: 10px 0 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .ai-modal-content { font-size: 14.5px; line-height: 1.75; color: #d7dae0; overflow-y: auto; flex: 1; padding-right: 8px; }
+    .ai-modal-content .pt { display: flex; gap: 12px; margin-bottom: 14px; }
+    .ai-modal-content .pt .mk { color: var(--accent); flex: none; }
+    .ai-modal-content strong { color: var(--text); font-weight: 500; }
+    .loading-block { color: var(--accent); text-align: center; padding: 40px 0;
+      font-family: 'Space Mono', monospace; font-size: 13px; animation: bh-pulse 1.5s infinite; }
+    .modal-foot { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); text-align: right; }
+    .modal-foot button { background: transparent; border: 1px solid var(--line-strong); color: var(--muted);
+      padding: 9px 18px; border-radius: 8px; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 13px; transition: all .2s; }
+    .modal-foot button:hover { color: var(--text); border-color: var(--muted); }
+
+    @keyframes bh-pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+    @keyframes bh-fade { to { opacity: 1; } }
+    @keyframes bh-pop { to { transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) { .orbit-badge { animation: none; } }
+  </style>
 </head>
 <body style="font-family: &quot;IBM Plex Sans Thai&quot;">
   <canvas id="bg-canvas"></canvas>
   <div id="scrim"></div>
   <div id="root"></div>
+
+  <!-- Orbiting tech badges (visible on hero, hidden on scroll via cosmos-app.jsx) -->
+  <div class="badge-layer" id="badge-layer">
+    <span class="orbit-badge b0">ESP32 · CAN Bus</span>
+    <span class="orbit-badge b1">Claude · RAG</span>
+    <span class="orbit-badge b2">YOLOX · OpenCV</span>
+    <span class="orbit-badge b3">SwiftUI · iOS</span>
+    <span class="orbit-badge b4">FastAPI</span>
+    <span class="orbit-badge b5">Fusion 360 · 3D Print</span>
+  </div>
+
+  <!-- Warp flash overlay -->
+  <div class="warp-flash" id="warp-flash"></div>
 
   <template id="__bundler_thumbnail">
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -57,5 +189,17 @@
   <script src="cosmos-scene.js"></script>
   <script type="text/babel" src="tweaks-panel.jsx"></script>
   <script type="text/babel" src="cosmos-app.jsx"></script>
+
+  <!-- Fade badge-layer on scroll -->
+  <script>
+    (function () {
+      var bl = document.getElementById('badge-layer');
+      var wf = document.getElementById('warp-flash');
+      if (!bl) return;
+      window.addEventListener('scroll', function () {
+        bl.style.opacity = window.scrollY > 80 ? '0' : '1';
+      }, { passive: true });
+    })();
+  </script>
 </body>
 </html>
