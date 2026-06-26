@@ -1,3 +1,10 @@
 .DS_Store
 .thumbnail
 *.local
+
+# backups
+*.bak
+*.bka
+
+# local helpers / scratch
+font-preview.html
