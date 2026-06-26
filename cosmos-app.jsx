@@ -6,9 +6,9 @@ const T = (th, en) => ({ th, en });
 // ---- color directions ----
 const DIRECTIONS = {
   interstellar: {
-    label: 'Interstellar',
-    accent: '#ff5a36', soft: 'rgba(255,90,54,0.16)', glow: 'rgba(255,90,54,0.5)',
-    palette: { inner: '#fff4d6', mid: '#ff5a36', outer: '#7a2bd0' },
+    label: 'Copper',
+    accent: '#c8814a', soft: 'rgba(200,129,74,0.16)', glow: 'rgba(200,129,74,0.5)',
+    palette: { inner: '#fbe7c2', mid: '#c8814a', outer: '#6e3320' },
   },
   quasar: {
     label: 'Quasar',

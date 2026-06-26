@@ -22,7 +22,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Space+Mono:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
   <!-- Three.js r128 + post-processing (UnrealBloom) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -62,7 +62,7 @@
       position: absolute;
       background: rgba(12,12,14,0.45); backdrop-filter: blur(6px);
       border: 1px solid var(--line); padding: 5px 12px; border-radius: 999px;
-      font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: .02em;
+      font-family: var(--mono); font-size: 11.5px; letter-spacing: .02em;
       color: var(--muted); animation: float-orbit 20s infinite linear;
     }
     .orbit-badge.b0 { top: 22%; left: 8%;  animation-delay: 0s; }
@@ -83,11 +83,11 @@
     .deep-btn {
       margin-top: 18px; width: 100%;
       background: var(--accent-soft); color: var(--accent);
-      font-family: 'Space Mono', monospace; font-size: 12.5px; letter-spacing: .02em;
+      font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em;
       padding: 11px; border-radius: 8px; cursor: pointer;
       border: 1px solid var(--accent-soft); transition: background .2s, border-color .2s;
     }
-    .deep-btn:hover { background: rgba(255,90,54,0.26); border-color: var(--accent); }
+    .deep-btn:hover { background: rgba(200,129,74,0.26); border-color: var(--accent); }
 
     /* Ask-AI-clone box */
     .ai-box {
@@ -105,21 +105,21 @@
     .ai-row input {
       flex: 1; min-width: 220px; background: rgba(5,5,5,0.6);
       border: 1px solid var(--line-strong); border-radius: 8px; padding: 14px 16px;
-      font-family: 'Space Mono', monospace; font-size: 13.5px; color: var(--text); transition: border-color .2s;
+      font-family: var(--mono); font-size: 13.5px; color: var(--text); transition: border-color .2s;
     }
     .ai-row input:focus { outline: none; border-color: var(--accent); }
     .ai-row input::placeholder { color: var(--faint); }
     .ai-row button {
       background: var(--accent); color: #fff; border: 0; border-radius: 8px;
-      padding: 14px 28px; font-family: 'Kanit', sans-serif; font-weight: 500; font-size: 15px;
+      padding: 14px 28px; font-family: var(--display); font-weight: 500; font-size: 15px;
       cursor: pointer; box-shadow: 0 0 24px -6px var(--glow); transition: transform .2s;
     }
     .ai-row button:hover { transform: translateY(-2px); }
     .ai-answer { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 18px;
       font-size: 14.5px; line-height: 1.7; color: #d7dae0; }
-    .ai-answer .label { display: block; font-family: 'Space Mono', monospace; font-size: 11px;
+    .ai-answer .label { display: block; font-family: var(--mono); font-size: 11px;
       letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-    .loading { color: var(--accent); font-family: 'Space Mono', monospace; font-size: 13px;
+    .loading { color: var(--accent); font-family: var(--mono); font-size: 13px;
       animation: bh-pulse 1.5s infinite; }
 
     /* AI modal */
@@ -130,22 +130,22 @@
       position: relative; background: var(--bg-2); border: 1px solid var(--line-strong);
       border-radius: 18px; padding: clamp(26px,4vw,38px); max-width: 660px; width: 100%;
       max-height: 85vh; display: flex; flex-direction: column;
-      box-shadow: 0 0 60px rgba(255,90,54,0.12); transform: scale(.96); animation: bh-pop .25s forwards;
+      box-shadow: 0 0 60px rgba(200,129,74,0.12); transform: scale(.96); animation: bh-pop .25s forwards;
     }
     .ai-modal-card h3 { font-size: 22px; font-weight: 500; margin: 0; letter-spacing: -0.01em;
       display: flex; align-items: center; gap: 12px; }
     .modal-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 14px var(--glow); flex: none; }
-    .ai-modal-sub { font-family: 'Space Mono', monospace; font-size: 12.5px; color: var(--faint);
+    .ai-modal-sub { font-family: var(--mono); font-size: 12.5px; color: var(--faint);
       margin: 10px 0 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
     .ai-modal-content { font-size: 14.5px; line-height: 1.75; color: #d7dae0; overflow-y: auto; flex: 1; padding-right: 8px; }
     .ai-modal-content .pt { display: flex; gap: 12px; margin-bottom: 14px; }
     .ai-modal-content .pt .mk { color: var(--accent); flex: none; }
     .ai-modal-content strong { color: var(--text); font-weight: 500; }
     .loading-block { color: var(--accent); text-align: center; padding: 40px 0;
-      font-family: 'Space Mono', monospace; font-size: 13px; animation: bh-pulse 1.5s infinite; }
+      font-family: var(--mono); font-size: 13px; animation: bh-pulse 1.5s infinite; }
     .modal-foot { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); text-align: right; }
     .modal-foot button { background: transparent; border: 1px solid var(--line-strong); color: var(--muted);
-      padding: 9px 18px; border-radius: 8px; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 13px; transition: all .2s; }
+      padding: 9px 18px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-size: 13px; transition: all .2s; }
     .modal-foot button:hover { color: var(--text); border-color: var(--muted); }
 
     @keyframes bh-pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
@@ -175,9 +175,9 @@
   <template id="__bundler_thumbnail">
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="100" fill="#050505"/>
-      <circle cx="50" cy="50" r="26" fill="none" stroke="#ff5a36" stroke-width="6" opacity="0.9"/>
+      <circle cx="50" cy="50" r="26" fill="none" stroke="#c8814a" stroke-width="6" opacity="0.9"/>
       <circle cx="50" cy="50" r="14" fill="#050505"/>
-      <circle cx="50" cy="50" r="14" fill="none" stroke="#ffd0b0" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="14" fill="none" stroke="#fbe7c2" stroke-width="1.5"/>
     </svg>
   </template>
 

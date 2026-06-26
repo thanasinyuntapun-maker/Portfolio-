@@ -10,7 +10,7 @@ window.PORTFOLIO = {
     nameShort: "Thanasin.",
     role: T("วิศวกร & นักพัฒนา AI", "Engineer & AI Developer"),
     location: T("กรุงเทพฯ ประเทศไทย", "Bangkok, Thailand"),
-    education: T("วิศวกรรมเครื่องกล/Robotics — จุฬาฯ", "Mech. Eng. / Robotics — Chulalongkorn"),
+    education: T("นักศึกษาวิศวกรรม — จุฬาฯ", "Engineering student — Chulalongkorn"),
     availability: T("เปิดรับงาน Freelance", "Open to freelance"),
     email: "thanasin.yuntapun@gmail.com",
     line: "@ryujin_op1",
@@ -23,8 +23,8 @@ window.PORTFOLIO = {
     headlineEm: T("AI,", "AI,"),
     headlinePost: T("Computer Vision, ระบบฝังตัว และ iOS App", "computer vision, embedded & iOS"),
     sub: T(
-      "นักศึกษาวิศวกรรมเครื่องกล/Robotics จุฬาฯ รับงานเขียนโค้ดและพัฒนาระบบ ตั้งแต่ฮาร์ดแวร์ (ESP32, CAN Bus, 3D Print) ไปจนถึง AI (Chatbot, RAG, Computer Vision)",
-      "Mechanical / Robotics engineering student at Chulalongkorn. From hardware (ESP32, CAN Bus, 3D Print) to AI (chatbots, RAG, computer vision)."
+      "นักศึกษาวิศวกรรม จุฬาฯ รับงานฟรีแลนซ์ ทำทั้งฮาร์ดแวร์ (ESP32, CAN Bus, 3D Print) และซอฟต์แวร์ (Chatbot, RAG, Computer Vision)",
+      "Engineering student at Chulalongkorn, doing freelance work. I build hardware (ESP32, CAN bus, 3D printing) and software (chatbots, RAG, computer vision)."
     ),
     meta: [
       { label: T("ที่ตั้ง", "Location"), value: T("กรุงเทพฯ 🇹🇭", "Bangkok 🇹🇭") },

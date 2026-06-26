@@ -20,7 +20,7 @@
   window.initCosmos = function initCosmos(canvas, initial) {
     initial = initial || {};
     let palette = initial.palette || {
-      inner: '#fff4d6', mid: '#ff5a36', outer: '#7a2bd0',
+      inner: '#fbe7c2', mid: '#c8814a', outer: '#6e3320',
     };
     let strengthKey = initial.strength || 'subtle';
 
