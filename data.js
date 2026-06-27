@@ -212,12 +212,12 @@ window.PORTFOLIO = {
       year: "2026",
       client: T("โปรเจกต์ส่วนตัว / วิศวกรรมโครงสร้าง", "Personal / Structural Engineering"),
       desc: T(
-        "Shear Building Simulator แบบ multi-DOF ครบวงจร — Jacobi eigenvalue solver, mode shapes, FRF, และ time-domain response ด้วย Newmark-β พร้อม TMD และ Viscous Damper control เขียน pure JS ไม่มี dependency ภายนอก",
-        "Multi-DOF shear building vibration simulator — Jacobi eigenvalue solver, mode shapes, FRF, Newmark-β time integration, plus TMD and viscous damper control. Pure JS, zero external dependencies."
+        "Shear Building Simulator แบบ multi-DOF ครบวงจร — Jacobi eigenvalue solver, mode shapes, FRF, time-domain Newmark-β กระตุ้นด้วย accelerogram จริง (El Centro 1940) ระบบควบคุม 4 แบบ: TMD, Viscous Damper, Base Isolation และ Active Control (LQR แก้ Riccati ด้วย matrix sign-function) พร้อมรายงาน inter-story drift เทียบเกณฑ์ ASCE 7 + export PDF เขียน pure JS ไม่มี dependency",
+        "Full multi-DOF shear building simulator — Jacobi eigensolver, mode shapes, FRF, Newmark-β time integration driven by a real recorded accelerogram (El Centro 1940). Four control systems: TMD, viscous dampers, base isolation, and LQR active control (CARE via matrix sign-function). Inter-story drift checked against ASCE 7 with a printable PDF report. Pure JS, zero dependencies."
       ),
-      tags: ["Structural Dynamics", "Eigenvalue / Jacobi", "Newmark-β", "TMD", "FRF", "Pure JS"],
-      role: T("Solo · 2 สัปดาห์", "Solo · 2 weeks"),
-      outcome: T("TMD ลด amplitude 60%+", "TMD reduces amplitude 60%+"),
+      tags: ["Structural Dynamics", "Eigenvalue / Jacobi", "Newmark-β", "LQR Active Control", "Base Isolation", "TMD", "El Centro 1940", "ASCE 7 Drift", "Pure JS"],
+      role: T("Solo · 3 สัปดาห์", "Solo · 3 weeks"),
+      outcome: T("LQR ลด drift 90%+ · isolation ลด base shear 84%", "LQR cuts drift 90%+ · isolation −84% base shear"),
       liveUrl: "projects/shear-building/",
       githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/shear-building",
     },
