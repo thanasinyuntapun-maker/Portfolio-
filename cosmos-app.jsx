@@ -277,15 +277,31 @@ function App() {
           <span className="eyebrow" style={{ justifyContent: 'center' }}><span className="tick"></span>{tr(T('ติดต่อ', 'Contact'))}</span>
           <h2>{tr(T('รับงาน', 'Open to'))} <span className="em">{tr(T('freelance', 'freelance'))}</span></h2>
           <p className="sub">{tr(T('ตอบกลับภายใน 24 ชม. ทักมาคุยรายละเอียดของงานได้เลย', 'Replies within 24 hours — send the details and let’s talk.'))}</p>
-          <div className="contact-links">
-            <a className="contact-card" href={'mailto:' + P.brand.email}>
-              <span className="k">Email</span><span className="v">{P.brand.email}</span>
+          <div className="social-links">
+            <a className="social-card" href={'mailto:' + P.brand.email} aria-label={'Email — ' + P.brand.email}>
+              <span className="social-ico">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                  <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+                </svg>
+              </span>
+              <span className="social-txt"><span className="k">Email</span><span className="v">{P.brand.email}</span></span>
             </a>
-            <a className="contact-card" href="#">
-              <span className="k">LINE</span><span className="v">{P.brand.line}</span>
+            <a className="social-card" href={'https://line.me/R/ti/p/' + encodeURIComponent(P.brand.line)} target="_blank" rel="noreferrer" aria-label={'LINE — ' + P.brand.line}>
+              <span className="social-ico">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+                </svg>
+              </span>
+              <span className="social-txt"><span className="k">LINE</span><span className="v">{P.brand.line}</span></span>
             </a>
-            <a className="contact-card" href={'https://github.com/' + P.brand.github} target="_blank" rel="noreferrer">
-              <span className="k">GitHub</span><span className="v">{P.brand.github}</span>
+            <a className="social-card" href={'https://github.com/' + P.brand.github} target="_blank" rel="noreferrer" aria-label={'GitHub — ' + P.brand.github}>
+              <span className="social-ico">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                </svg>
+              </span>
+              <span className="social-txt"><span className="k">GitHub</span><span className="v">{P.brand.github}</span></span>
             </a>
           </div>
         </div>
