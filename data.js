@@ -278,6 +278,25 @@ window.PORTFOLIO = {
       liveUrl: "projects/hand-particles/",
       githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/hand-particles",
     },
+    {
+      id: "biz-docs",
+      idx: "14",
+      cats: ["ai"],
+      cat: T("Automation · Google Apps Script", "Automation · Google Apps Script"),
+      title: T("ระบบเอกสารธุรกิจ", "Business documents"),
+      titleEm: T("อัตโนมัติบน Sheets", "automated on Sheets"),
+      year: "2026",
+      client: T("แจกฟรี · เทมเพลตดาวน์โหลด", "Free download template"),
+      desc: T(
+        "ออกใบเสนอราคา ใบแจ้งหนี้ ใบเสร็จรับเงิน เป็น PDF อัตโนมัติจาก Google Sheets — เลขที่เอกสารรันเอง เติมเทมเพลตแล้ว export PDF ลง Drive อ้างอิงเอกสารต่อกันได้ (ใบแจ้งหนี้ → ใบเสร็จ อัปเดตสถานะจ่ายเงินอัตโนมัติ) พร้อม Dashboard สรุปยอด ไม่มีเซิร์ฟเวอร์ ไม่มีค่าใช้จ่าย",
+        "Auto-generates quotations, invoices, and receipts as PDFs straight from Google Sheets — sequential doc numbering, template fill + Drive export, linked documents (invoice → receipt auto-marks paid), and a revenue dashboard. Zero server, free to use."
+      ),
+      tags: ["Google Apps Script", "Google Sheets", "PDF Export", "Automation"],
+      role: T("Solo", "Solo"),
+      outcome: T("ติดตั้งพร้อมใช้ใน 5 นาที", "5-minute setup, free download"),
+      liveUrl: "projects/biz-docs/",
+      githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/biz-docs",
+    },
   ],
 
   services: [

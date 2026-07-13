@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบเอกสารธุรกิจอัตโนมัติ — Google Sheets</title>
+<meta name="description" content="ออกใบเสนอราคา / ใบแจ้งหนี้ / ใบเสร็จรับเงิน เป็น PDF อัตโนมัติจาก Google Sheets ฟรี ไม่ต้องติดตั้งอะไรเพิ่ม">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#F4F3EF;--surface:#FFF;--ink:#1A1A2E;--soft:#6B6B80;
+  --border:#E2E0D8;--accent:#2563EB;--good:#16A34A;--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.6;}
+a{color:inherit;}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px;}
+
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 0;position:sticky;top:0;z-index:10;}
+.hdr .wrap{display:flex;align-items:center;gap:10px;}
+.hdr-logo{width:34px;height:34px;background:var(--accent);border-radius:9px;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.hdr-t{font-size:14px;font-weight:700;}
+.hdr-back{margin-left:auto;font-size:13px;color:var(--soft);text-decoration:none;font-weight:600;}
+.hdr-back:hover{color:var(--accent);}
+
+.hero{padding:56px 0 40px;}
+.eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent);
+  background:rgba(37,99,235,.08);padding:5px 12px;border-radius:100px;margin-bottom:16px;}
+h1{font-size:clamp(28px,4.5vw,42px);font-weight:700;line-height:1.25;margin-bottom:14px;}
+h1 em{color:var(--accent);font-style:normal;}
+.lead{font-size:16px;color:var(--soft);max-width:60ch;margin-bottom:28px;}
+
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:10px;
+  font-weight:700;font-size:14px;text-decoration:none;border:1.5px solid transparent;transition:.15s;}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:var(--accent);}
+.btn-ghost{border-color:var(--border);color:var(--ink);background:var(--surface);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.cta-note{font-size:12px;color:var(--soft);font-family:'IBM Plex Mono',monospace;}
+
+.section{padding:36px 0;border-top:1px solid var(--border);}
+.section h2{font-size:20px;font-weight:700;margin-bottom:18px;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+.card .ic{font-size:20px;margin-bottom:8px;}
+.card h3{font-size:14.5px;font-weight:700;margin-bottom:6px;}
+.card p{font-size:13px;color:var(--soft);}
+
+.sheets{display:flex;flex-wrap:wrap;gap:8px;}
+.sheet-pill{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:100px;padding:6px 12px;color:var(--soft);}
+
+.steps{counter-reset:step;list-style:none;}
+.steps li{counter-increment:step;position:relative;padding:14px 0 14px 40px;border-bottom:1px solid var(--border);font-size:14px;}
+.steps li:last-child{border-bottom:none;}
+.steps li::before{content:counter(step);position:absolute;left:0;top:12px;width:26px;height:26px;
+  border-radius:8px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;}
+.steps b{display:block;margin-bottom:2px;}
+.steps span{color:var(--soft);font-size:13px;}
+
+.note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--r);padding:14px 16px;font-size:13px;color:#92400E;margin-top:16px;}
+
+.dl-box{background:var(--ink);color:#fff;border-radius:18px;padding:32px;text-align:center;}
+.dl-box h2{color:#fff;}
+.dl-box p{color:rgba(255,255,255,.65);font-size:14px;margin:8px 0 22px;}
+.dl-box .btn-primary{background:var(--accent);}
+.dl-box .btn-primary:hover{background:#3B82F6;}
+.dl-meta{margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);}
+
+.footer{padding:28px 0 60px;text-align:center;font-size:12px;color:var(--soft);}
+.footer a{color:var(--accent);font-weight:600;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap">
+    <div class="hdr-logo">📄</div>
+    <div class="hdr-t">ระบบเอกสารธุรกิจอัตโนมัติ</div>
+    <a class="hdr-back" href="../../index.html">← กลับ Portfolio</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">FREE TEMPLATE · Google Sheets + Apps Script</span>
+    <h1>ออกใบเสนอราคา ใบแจ้งหนี้ ใบเสร็จ <em>เป็น PDF อัตโนมัติ</em> ใน 3 คลิก</h1>
+    <p class="lead">
+      ระบบเอกสารธุรกิจที่ทำงานอยู่บน Google Sheets ล้วน ๆ — ไม่ต้องติดตั้งโปรแกรม ไม่ต้องเช่าเซิร์ฟเวอร์
+      กรอกรายการสินค้า เลือกลูกค้าจาก dropdown แล้วกดปุ่มเดียว ระบบจะเลขที่เอกสารให้อัตโนมัติ
+      เติมเทมเพลต export เป็น PDF ลง Drive และอัปเดตสถานะการจ่ายเงินให้เอง
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="download/business-docs-automation.zip" download>⬇ ดาวน์โหลดฟรี (.zip)</a>
+      <a class="btn btn-ghost" href="#install">ดูวิธีติดตั้ง</a>
+      <span class="cta-note">~46 KB · ไม่มีค่าใช้จ่าย · ใช้ได้กับบัญชี Google ทั่วไป</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>ระบบทำอะไรให้บ้าง</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="ic">🧾</div>
+        <h3>เลขที่เอกสารอัตโนมัติ</h3>
+        <p>รันเลขที่ใบเสนอราคา/ใบแจ้งหนี้/ใบเสร็จให้เอง ไม่ซ้ำ ไม่ต้องจำ</p>
+      </div>
+      <div class="card">
+        <div class="ic">📤</div>
+        <h3>Export PDF ลง Drive</h3>
+        <p>เติมข้อมูลลงเทมเพลตแล้วส่งออกเป็น PDF เก็บเป็นไฟล์แยกอัตโนมัติทุกใบ</p>
+      </div>
+      <div class="card">
+        <div class="ic">🔗</div>
+        <h3>อ้างอิงเอกสารต่อกัน</h3>
+        <p>ออกใบแจ้งหนี้จากใบเสนอราคา หรือใบเสร็จจากใบแจ้งหนี้ — สถานะอัปเดตให้เองว่า "ชำระแล้ว"</p>
+      </div>
+      <div class="card">
+        <div class="ic">👥</div>
+        <h3>ฐานข้อมูลลูกค้า</h3>
+        <p>เก็บรายชื่อลูกค้าไว้เลือกจาก dropdown ไม่ต้องพิมพ์ที่อยู่ซ้ำทุกครั้ง</p>
+      </div>
+      <div class="card">
+        <div class="ic">📊</div>
+        <h3>Dashboard สรุปยอด</h3>
+        <p>กราฟรายรับรายเดือน และลูกค้าสูงสุด 5 อันดับ อัปเดตสดจากประวัติเอกสาร</p>
+      </div>
+      <div class="card">
+        <div class="ic">🔒</div>
+        <h3>ทำงานในไฟล์ตัวเอง</h3>
+        <p>สคริปต์เข้าถึงเฉพาะไฟล์นี้กับโฟลเดอร์ที่มันสร้างขึ้น ไม่แตะไฟล์อื่นใน Drive</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>10 ชีทที่มาให้ในไฟล์</h2>
+    <div class="sheets">
+      <span class="sheet-pill">Dashboard</span>
+      <span class="sheet-pill">Settings</span>
+      <span class="sheet-pill">Clients</span>
+      <span class="sheet-pill">New Document</span>
+      <span class="sheet-pill">Quotation_Template</span>
+      <span class="sheet-pill">Invoice_Template</span>
+      <span class="sheet-pill">Receipt_Template</span>
+      <span class="sheet-pill">Quotations (log)</span>
+      <span class="sheet-pill">Invoices (log)</span>
+      <span class="sheet-pill">Receipts (log)</span>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="install">
+  <div class="wrap">
+    <h2>วิธีติดตั้ง (5 นาที)</h2>
+    <ol class="steps">
+      <li><b>อัปโหลดไฟล์ .xlsx ขึ้น Google Drive</b><span>ดับเบิลคลิก → เปิดด้วย Google Sheets ระบบแปลงไฟล์ให้อัตโนมัติ</span></li>
+      <li><b>ใส่ Apps Script</b><span>เมนู Extensions → Apps Script → ลบโค้ดเดิม วางไฟล์ Code.gs ที่แจกมาแทน แล้ว Save</span></li>
+      <li><b>รีเฟรชหน้า Sheets</b><span>จะมีเมนูใหม่ชื่อ "เอกสารธุรกิจ" ขึ้นข้าง Help</span></li>
+      <li><b>ตั้งค่าเริ่มต้นครั้งแรก</b><span>เมนู เอกสารธุรกิจ → ตั้งค่าเริ่มต้น (รันครั้งแรก) → กด Allow ตอนขอสิทธิ์</span></li>
+      <li><b>กรอกข้อมูลกิจการ + ลูกค้า</b><span>ชีท Settings และ Clients แล้วเริ่มออกเอกสารได้ที่ชีท New Document</span></li>
+    </ol>
+    <div class="note">
+      ⚠️ ห้ามลบ/แทรกแถวหรือคอลัมน์ในชีท Settings, เทมเพลต และ log sheets — สคริปต์อ้างอิงตำแหน่งเซลล์ตายตัว
+      รายละเอียดครบทั้งหมดอยู่ในไฟล์ <b>คู่มือติดตั้ง.md</b> ที่แนบมาในซิป
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="dl-box">
+    <h2>ดาวน์โหลดไปใช้ได้เลย</h2>
+    <p>ไฟล์ระบบ (.xlsx) + Apps Script (Code.gs) + คู่มือติดตั้งฉบับเต็ม (.md) — แจกฟรีไม่มีเงื่อนไข</p>
+    <a class="btn btn-primary" href="download/business-docs-automation.zip" download>⬇ ดาวน์โหลด business-docs-automation.zip</a>
+    <div class="dl-meta">3 files · ~46 KB · .xlsx + Code.gs + คู่มือ.md</div>
+  </div>
+</section>
+
+<footer class="footer">
+  ทำโดย Thanasin Yuntapun ·
+  <a href="../../index.html">ดูผลงานอื่น ๆ</a> ·
+  <a href="mailto:thanasin.yuntapun@gmail.com">ติดต่องาน Freelance</a>
+</footer>
+
+</body>
+</html>
