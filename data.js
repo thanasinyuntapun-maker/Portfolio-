@@ -42,6 +42,7 @@ window.PORTFOLIO = {
     { id: "sim",     label: T("Simulation", "Simulation") },
     { id: "mobile",  label: T("Mobile", "Mobile") },
     { id: "mfg",     label: T("Manufacturing", "Manufacturing") },
+    { id: "web",     label: T("เว็บไซต์", "Websites") },
   ],
 
   projects: [
@@ -296,6 +297,24 @@ window.PORTFOLIO = {
       outcome: T("ติดตั้งพร้อมใช้ใน 5 นาที", "5-minute setup, free download"),
       liveUrl: "projects/biz-docs/",
       githubUrl: "https://github.com/thanasinyuntapun-maker/Portfolio-/tree/main/projects/biz-docs",
+    },
+    {
+      id: "uni-forum",
+      idx: "15",
+      cats: ["web"],
+      cat: T("เว็บไซต์ · งานประชุม", "Website · Conference"),
+      title: T("เว็บไซต์", "Website for a"),
+      titleEm: T("งานประชุมระดับชาติ", "national forum"),
+      year: "2026",
+      client: T("หน่วยงานจัดประชุมด้านการศึกษา", "Education-sector forum organizer"),
+      desc: T(
+        "เว็บไซต์ประชาสัมพันธ์งานประชุมระดับชาติ สองภาษา (ไทย/อังกฤษ) — หน้ากำหนดการ วิทยากร และข่าวสาร พร้อมระบบล็อกอินสำหรับผู้ดูแลจัดการเนื้อหา ฟรอนต์เอนด์ React (Vite) หลังบ้าน Express deploy บน Google Cloud Run",
+        "Bilingual (TH/EN) landing site for a national conference — agenda, speakers, and news, plus an admin login for content management. React (Vite) frontend, Express backend, deployed on Google Cloud Run."
+      ),
+      tags: ["React", "Vite", "Express", "Google Cloud Run"],
+      role: T("รับงานฟรีแลนซ์", "Freelance engagement"),
+      outcome: T("Live พร้อมระบบแอดมินจัดการเนื้อหา", "Live with an admin CMS backend"),
+      liveUrl: "https://thai-university-presidents-forum-2026-792264418714.asia-southeast1.run.app",
     },
   ],
 
