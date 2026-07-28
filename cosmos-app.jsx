@@ -53,9 +53,10 @@ function useReveal() {
 function App() {
   const P = window.PORTFOLIO;
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [lang, setLang] = useState(() => localStorage.getItem('cosmos-lang') || 'en');
+  const [lang, setLang] = useState(() => localStorage.getItem('cosmos-lang') || 'th');
   const [filter, setFilter] = useState('all');
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const sceneRef = useRef(null);
 
   const tr = (f) => (f && typeof f === 'object' ? f[lang] : f);
@@ -92,6 +93,14 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === 'Escape') setMobileOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   useReveal();
 
   const projects = useMemo(
@@ -102,12 +111,22 @@ function App() {
   const marqueeItems = ['ESP32 · CAN Bus', 'Claude · RAG', 'YOLOX · OpenCV',
     'SwiftUI · iOS', 'FastAPI', 'Fusion 360 · 3D Print'];
 
+  const proofPoints = [
+    { value: '17+', label: T('ระบบที่สร้างและส่งมอบ', 'systems built & shipped') },
+    { value: '96.4%', label: T('Recall ระบบอ่านป้ายทะเบียน', 'license-plate recall') },
+    { value: '−62%', label: T('ภาระแอดมินจาก AI Chatbot', 'admin load with AI chatbot') },
+    { value: '90%+', label: T('ลด drift ด้วย LQR', 'drift reduction with LQR') },
+  ];
+
+  const closeMobile = () => setMobileOpen(false);
+
   return (
     <React.Fragment>
       {/* NAV */}
       <nav className={'nav' + (scrolled ? ' scrolled' : '')}>
-        <a className="brand" href="#top">
-          <span className="dot"></span>{P.brand.nameShort}
+        <a className="brand" href="#top" onClick={closeMobile}>
+          <span className="brand-mark"><span className="brand-core"></span></span>
+          <span>{P.brand.nameShort}</span>
         </a>
         <div className="nav-links">
           <a className="link" href="#work">{tr(T('ผลงาน', 'Work'))}</a>
@@ -115,16 +134,33 @@ function App() {
           <a className="link" href="#skills">{tr(T('ทักษะ', 'Skills'))}</a>
           <a className="link" href="#contact">{tr(T('ติดต่อ', 'Contact'))}</a>
         </div>
-        <div className="lang-toggle">
-          <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
-          <button className={lang === 'th' ? 'active' : ''} onClick={() => setLang('th')}>TH</button>
+        <div className="nav-actions">
+          <div className="lang-toggle" aria-label={tr(T('เลือกภาษา', 'Select language'))}>
+            <button className={lang === 'th' ? 'active' : ''} onClick={() => setLang('th')}>TH</button>
+            <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
+          </div>
+          <button
+            className={'nav-burger' + (mobileOpen ? ' open' : '')}
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+            aria-label={tr(T('เปิดเมนู', 'Open menu'))}
+          >
+            <span></span><span></span>
+          </button>
+        </div>
+        <div id="mobile-menu" className={'mobile-menu' + (mobileOpen ? ' open' : '')}>
+          <a href="#work" onClick={closeMobile}><span>01</span>{tr(T('ผลงาน', 'Work'))}</a>
+          <a href="#services" onClick={closeMobile}><span>02</span>{tr(T('บริการ', 'Services'))}</a>
+          <a href="#skills" onClick={closeMobile}><span>03</span>{tr(T('ทักษะ', 'Skills'))}</a>
+          <a href="#contact" onClick={closeMobile}><span>04</span>{tr(T('ติดต่อ', 'Contact'))}</a>
         </div>
       </nav>
 
       {/* HERO */}
       <header id="top" className="hero">
         <div className="wrap hero-grid">
-          <div>
+          <div className="hero-copy">
             <span className="eyebrow"><span className="tick"></span>{tr(P.hero.eyebrow)}</span>
             <h1>
               {tr(P.hero.headlinePre)} <span className="em">{tr(P.hero.headlineEm)}</span> {tr(P.hero.headlinePost)}
@@ -134,9 +170,32 @@ function App() {
               <a className="btn-primary" href="#work">{tr(T('ดูผลงาน', 'View work'))}<Arrow /></a>
               <a className="btn-ghost" href="#contact">{tr(T('ติดต่องาน', 'Get in touch'))}<Arrow /></a>
             </div>
-            <span className="avail"><span className="pulse"></span>{tr(P.brand.availability).toUpperCase()}</span>
+            <div className="hero-trust">
+              <span className="avail"><span className="pulse"></span>{tr(P.brand.availability)}</span>
+              <span className="hero-trust-sep"></span>
+              <span>{tr(T('ตอบกลับภายใน 24 ชม.', 'Replies within 24 hours'))}</span>
+            </div>
           </div>
-          <div>
+          <aside className="hero-panel" aria-label={tr(T('ข้อมูลโดยสรุป', 'Profile overview'))}>
+            <div className="panel-top">
+              <span className="panel-id">TY / ENGINEERING SYSTEMS</span>
+              <span className="panel-status"><span></span>ONLINE</span>
+            </div>
+            <div className="signal">
+              <div className="signal-orbit orbit-a"></div>
+              <div className="signal-orbit orbit-b"></div>
+              <div className="signal-cross cross-a"></div>
+              <div className="signal-cross cross-b"></div>
+              <div className="signal-core">
+                <span>AI</span>
+                <small>× ROBOTICS</small>
+              </div>
+            </div>
+            <div className="panel-focus">
+              <span>01 / SOFTWARE</span>
+              <span>02 / HARDWARE</span>
+              <span>03 / CONTROL</span>
+            </div>
             <div className="hero-meta">
               {P.hero.meta.map((m, i) => (
                 <div key={i}>
@@ -145,7 +204,7 @@ function App() {
                 </div>
               ))}
             </div>
-          </div>
+          </aside>
         </div>
       </header>
 
@@ -167,22 +226,41 @@ function App() {
 
       {/* WORK */}
       <main className="content">
+      <section className="proof-strip" aria-label={tr(T('ผลงานเชิงตัวเลข', 'Measured outcomes'))}>
+        <div className="wrap proof-grid">
+          {proofPoints.map((point, i) => (
+            <div className="proof-item reveal" key={i}>
+              <span className="proof-index">0{i + 1}</span>
+              <strong>{point.value}</strong>
+              <span>{tr(point.label)}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section id="work" className="block">
         <div className="wrap">
           <div className="section-head reveal">
             <div>
               <span className="eyebrow"><span className="tick"></span>{tr(T('ผลงาน', 'Work'))}</span>
-              <h2 className="section-title">{tr(T('ผลงาน', 'Selected'))} <span className="em">{tr(T('ที่ผ่านมา', 'work'))}</span></h2>
+              <h2 className="section-title">{tr(T('ระบบที่สร้าง', 'Selected systems'))} <span className="em">{tr(T('และวัดผลได้', '& outcomes'))}</span></h2>
             </div>
-            <span className="section-num">{String(P.projects.length).padStart(2, '0')} {tr(T('โปรเจกต์', 'projects'))}</span>
+            <p className="section-intro">{tr(T(
+              'ตั้งแต่ AI ที่ลดภาระทีม ไปจนถึงระบบควบคุมและ Computer Vision แบบ real-time',
+              'From AI that reduces team workload to real-time control and computer vision systems.'
+            ))}</p>
           </div>
 
-          <div className="filters reveal">
+          <div className="filter-row reveal">
+            <span className="filter-label">{tr(T('เลือกหมวด', 'Filter by'))}</span>
+            <div className="filters">
             {P.filters.map((f) => (
               <button key={f.id} className={'chip' + (filter === f.id ? ' active' : '')} onClick={() => setFilter(f.id)}>
                 {tr(f.label)}
               </button>
             ))}
+            </div>
+            <span className="filter-count">{String(projects.length).padStart(2, '0')} / {String(P.projects.length).padStart(2, '0')}</span>
           </div>
 
           <div className="work-grid">
@@ -190,19 +268,29 @@ function App() {
               <article key={p.id} className={'card reveal' + (p.feature ? ' feature' : '')}>
                 <span className="glow"></span>
                 <div className="card-top">
-                  <span className="card-cat">{tr(p.cat)}</span>
+                  <div>
+                    {p.feature && <span className="featured-label">{tr(T('ผลงานเด่น', 'Featured case'))}</span>}
+                    <span className="card-cat">{tr(p.cat)}</span>
+                  </div>
                   <span className="card-idx">{p.idx} / {p.year}</span>
                 </div>
                 <h3>{tr(p.title)} <span className="em">{tr(p.titleEm)}</span></h3>
                 <p className="desc">{tr(p.desc)}</p>
+                <div className="card-result">
+                  <span>{tr(T('ผลลัพธ์', 'Outcome'))}</span>
+                  <strong>{tr(p.outcome)}</strong>
+                </div>
+                <div className="card-meta">
+                  <div><span>{tr(T('สำหรับ', 'For'))}</span><strong>{tr(p.client)}</strong></div>
+                  <div><span>{tr(T('บทบาท', 'Role'))}</span><strong>{tr(p.role)}</strong></div>
+                </div>
                 <div className="card-foot">
                   {p.tags.slice(0, p.feature ? 5 : 3).map((tg, i) => <span key={i} className="tag">{tg}</span>)}
-                  <span className="card-outcome">{tr(p.outcome)}</span>
                 </div>
                 {(p.liveUrl || p.githubUrl) && (
                   <div className="card-links">
-                    {p.liveUrl && <a className="card-link card-link--live" href={p.liveUrl} target="_blank" rel="noreferrer">Live ↗</a>}
-                    {p.githubUrl && <a className="card-link card-link--gh" href={p.githubUrl} target="_blank" rel="noreferrer">GitHub ↗</a>}
+                    {p.liveUrl && <a className="card-link card-link--live" href={p.liveUrl} target="_blank" rel="noreferrer">{tr(T('ทดลองใช้งาน', 'Live demo'))}<Arrow /></a>}
+                    {p.githubUrl && <a className="card-link card-link--gh" href={p.githubUrl} target="_blank" rel="noreferrer">GitHub <Arrow /></a>}
                   </div>
                 )}
               </article>
